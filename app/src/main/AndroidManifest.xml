@@ -12,11 +12,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EventsApp">
         <activity
+            android:name=".EventsActivity"
+            android:exported="false" />
+        <activity
             android:name=".RegisterActivity"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="false" /> <!-- pocetni ekran activity -->
+            android:exported="false" />
+
+        <!-- pocetni ekran activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true">

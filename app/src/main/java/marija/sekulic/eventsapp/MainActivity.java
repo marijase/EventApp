@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.lifecycle.ViewTreeViewModelKt;
+// import androidx.lifecycle.ViewTreeViewModelKt;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // setContentView() → prikazuje taj UI na ekranu
         // R.layout.activity_main je XML fajl
-        // Bez ovoga ekran bi bio prazan
+        // => dakle povezuje XML layout sa ovim
         setContentView(R.layout.activity_main);
 
         //služi za “moderni full-screen layout”,
@@ -52,7 +52,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         else if (viju.getId() == R.id.id_btn_register){
             // kliknut Register
+            Intent open_register = new Intent(MainActivity.this, RegisterActivity.class);
+            startActivity(open_register);
         }
     }
+
 
 }

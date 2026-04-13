@@ -7,7 +7,7 @@
     android:layout_height="50dp"
     android:background="@color/ljubicasta_tamnija"
     android:orientation="horizontal"
-    android:layout_marginTop="10dp"
+    android:layout_marginTop="20dp"
     >
     <TextView
         android:layout_height="match_parent"

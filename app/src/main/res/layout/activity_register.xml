@@ -60,6 +60,7 @@
             android:layout_weight="1"
             android:hint="@string/rgs_email"
             android:textSize="17sp"
+            android:inputType="textEmailAddress"
             >
         </EditText>
     </LinearLayout>
@@ -87,11 +88,13 @@
             android:layout_weight="1"
             android:hint="@string/rgs_password"
             android:textSize="17sp"
+            android:inputType="textPassword"
             >
         </EditText>
     </LinearLayout>
 
     <Button
+        android:id="@+id/id_rgs_btn"
         android:layout_width="120dp"
         android:layout_height="60dp"
         android:backgroundTint="@color/ljubicasta_tamnija"

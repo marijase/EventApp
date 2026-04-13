@@ -8,18 +8,8 @@
     android:orientation="vertical"
     tools:context=".MainActivity"
     >
-
-<!-- constraint:
-    gornja ivica da ide na gornju ivicu roditelja
-    leva -||-
-    desna -||-  -->
-
     <!-- Events App -->
-    <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent">
-        <include layout="@layout/header"></include>
-    </LinearLayout>
+    <include layout="@layout/header"></include>
 
 
     <!-- Prvi red -->
