@@ -14,7 +14,7 @@
         android:layout_width="390dp"
         android:layout_height="50dp"
         android:layout_gravity="center_horizontal"
-        android:hint="@string/username"
+        android:hint="@string/lgn_username"
 
         android:inputType="text"
         >
@@ -23,7 +23,7 @@
         android:layout_width="390dp"
         android:layout_height="50dp"
         android:layout_gravity="center_horizontal"
-        android:hint="@string/password"
+        android:hint="@string/lgn_password"
 
         android:inputType="text"
         >

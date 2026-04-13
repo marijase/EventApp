@@ -1,5 +1,16 @@
 <resources>
+    <!-- main activity: -->
     <string name="app_name">Events App</string>
-    <string name="username">Username</string>
-    <string name="password">Password</string>
+    <string name="btn_login">Login</string>
+    <string name="btn_register">Register</string>
+
+    <!-- login activity: -->
+    <string name="lgn_username">Username</string>
+    <string name="lgn_password">Password</string>
+
+    <!-- register activity: -->
+    <string name="rgs_username">Username</string>
+    <string name="rgs_email">Email</string>
+    <string name="rgs_password">Password</string>
+    <string name="rgs_button">REGISTER</string>
 </resources>
