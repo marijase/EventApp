@@ -15,7 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 public class EventsActivity extends AppCompatActivity {
     TextView subtitle;
     Bundle bundle;
-    Button btn;
+    Button btn_events, btn_myevents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,14 +23,30 @@ public class EventsActivity extends AppCompatActivity {
         //EdgeToEdge.enable(this);
         setContentView(R.layout.activity_events);
 
-        btn = findViewById(R.id.btn_events);
-        btn.setOnClickListener(new View.OnClickListener() {
+        // " Podrazumevano se pri pokretanju prikazuje EventsFragment" :
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.id_kontejner_fragmenata,new EventsFragment())
+                .commit();
+
+
+
+        btn_events = findViewById(R.id.btn_events);
+        btn_events.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // uzmi EventsFragment i stavi na mesto id_fragment_events:
-                getSupportFragmentManager().beginTransaction().replace(R.id.id_fragment_events,new EventsFragment())
+                getSupportFragmentManager().beginTransaction().replace(R.id.id_kontejner_fragmenata,new EventsFragment())
                         .commit();
 
+            }
+        });
+        btn_myevents = findViewById(R.id.btn_myevents);
+        btn_myevents.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // samo se instance objekata smenjuju, a kontejner je isti
+                getSupportFragmentManager().beginTransaction().replace(R.id.id_kontejner_fragmenata, new MyEventsFragment())
+                        .commit();
             }
         });
 

@@ -17,7 +17,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         >
     </include>
-
+    <!-- naslov -->
     <TextView
         android:id="@+id/welcome"
         android:layout_width="match_parent"
@@ -31,6 +31,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         >
     </TextView>
+
+    <!-- podnaslov -->
     <TextView
         android:id="@+id/id_events_activity_subtitle"
         android:layout_width="match_parent"
@@ -44,19 +46,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         >
     </TextView>
-    
+
+    <!-- fragment (smenjuju se events i my events) -->
     <FrameLayout
-        android:id="@+id/id_fragment_events"
+        android:id="@+id/id_kontejner_fragmenata"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/id_events_activity_subtitle"
         app:layout_constraintBottom_toTopOf="@+id/btn_events"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-
+        android:backgroundTint="@color/siva_svetlija"
         >
     </FrameLayout>
-    
+
+
     <Button
         android:id="@+id/btn_events"
         android:layout_width="0dp"
@@ -76,6 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="@string/btn_myevents"
+        android:textSize="12sp"
         android:backgroundTint="@color/ljubicasta_svetlija"
 
         app:layout_constraintBottom_toBottomOf="parent"
