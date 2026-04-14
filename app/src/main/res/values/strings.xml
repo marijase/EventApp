@@ -22,4 +22,9 @@
     <string name="btn_events">EVENTS</string>
     <string name="btn_myevents">MY EVENTS</string>
     <string name="btn_friends">FRIENDS</string>
+
+    <!-- fragment events -->
+    <string name="no_upcoming">No upcoming events</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
