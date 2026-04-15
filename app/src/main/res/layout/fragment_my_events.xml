@@ -14,7 +14,7 @@
         android:orientation="horizontal"
         >
         <Button
-            android:id="@+id/id_interested"
+            android:id="@+id/id_btn_interested"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -24,7 +24,7 @@
             >
         </Button>
         <Button
-            android:id="@+id/id_attending"
+            android:id="@+id/id_btn_attending"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -35,7 +35,7 @@
         </Button>
     </LinearLayout>
     <Button
-        android:id="@+id/id_profile"
+        android:id="@+id/id_btn_myprofile"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:backgroundTint="@color/ljubicasta_tamnija"

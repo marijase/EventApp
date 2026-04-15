@@ -35,4 +35,11 @@
     <!-- interested activity -->
     <string name="interested_events">Interested Events</string>
 
+    <!-- attendind activity -->
+    <string name="attendind_events">Attendind Events</string>
+
+    <!-- Profile activity -->
+    <string name="btn_password">PASSWORD</string>
+    <string name="end_session">END SESSION</string>
+
 </resources>

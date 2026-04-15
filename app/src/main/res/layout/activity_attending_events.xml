@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/id_activity_attending"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".AttendingEventsActivity">
+    <include layout="@layout/header"></include>
+
+    <TextView
+        android:id="@+id/id_attending_events"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/attendind_events"
+        android:gravity="center"
+        android:textColor="@color/siva"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        >
+    </TextView>
+
+</LinearLayout>
