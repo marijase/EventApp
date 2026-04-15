@@ -66,9 +66,13 @@ public class MyEventsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent open_myprofile = new Intent(getActivity(), ProfileActivity.class);
+                Bundle bundle = getActivity().getIntent().getExtras();
+                open_myprofile.putExtras(bundle);
                 startActivity(open_myprofile);
             }
         });
+
+
 
         return view;
         //return inflater.inflate(R.layout.fragment_my_events, container, false);

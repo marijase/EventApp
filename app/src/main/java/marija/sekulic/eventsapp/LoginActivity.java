@@ -43,6 +43,7 @@ public class LoginActivity extends AppCompatActivity {
                                     Toast.LENGTH_LONG).show();
                     // u bundle se stavljaju samo validni podaci, zato ne treba ranije da se pise
                     bundle.putString("username_kljuc", username);
+                    bundle.putString("email_kljuc", "admin@gmail.com");
                     bundle.putString("password_kljuc", password);// tek "admin" i "admin" su validni
 
                     Intent open_events = new Intent(LoginActivity.this, EventsActivity.class);
@@ -53,20 +54,26 @@ public class LoginActivity extends AppCompatActivity {
                 else if (!username.equals("admin") && !password.equals("admin")){
                     lgn_username.setText("");
                     lgn_password.setText("");
-                    Toast.makeText(LoginActivity.this, "Email and password wrong! Try again.",
-                                    Toast.LENGTH_SHORT).show();
+                    Toast t = Toast.makeText(LoginActivity.this, "Email and password wrong! Try again.",
+                                    Toast.LENGTH_SHORT);
+                    t.setGravity(android.view.Gravity.CENTER, 0, 0);
+                    t.show();
                 }
                 else if (!password.equals("admin")){
                     lgn_username.setText("");
                     lgn_password.setText("");
-                    Toast.makeText(LoginActivity.this, "Wrong password! Try again.",
-                                    Toast.LENGTH_SHORT).show();
+                    Toast t = Toast.makeText(LoginActivity.this, "Wrong password! Try again.",
+                                    Toast.LENGTH_SHORT);
+                    t.setGravity(android.view.Gravity.CENTER, 0, 0);
+                    t.show();
                 }
                 else {
                     lgn_username.setText("");
                     lgn_password.setText("");
-                    Toast.makeText(LoginActivity.this,"Wrong email! Try again",
-                                    Toast.LENGTH_SHORT).show();
+                    Toast t = Toast.makeText(LoginActivity.this,"Wrong email! Try again",
+                                    Toast.LENGTH_SHORT);
+                    t.setGravity(android.view.Gravity.CENTER, 0, 0);
+                    t.show();
                 }
             }
         });
