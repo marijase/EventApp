@@ -1,6 +1,7 @@
 package marija.sekulic.eventsapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -14,7 +15,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class EventsActivity extends AppCompatActivity {
     TextView subtitle;
-    Bundle bundle;
     Button btn_events, btn_myevents;
 
     @Override
@@ -35,34 +35,36 @@ public class EventsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // uzmi EventsFragment i stavi na mesto id_fragment_events:
-                getSupportFragmentManager().beginTransaction().replace(R.id.id_kontejner_fragmenata,new EventsFragment())
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.id_kontejner_fragmenata,new EventsFragment())
                         .commit();
 
             }
         });
+
         btn_myevents = findViewById(R.id.btn_myevents);
         btn_myevents.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // samo se instance objekata smenjuju, a kontejner je isti
-                getSupportFragmentManager().beginTransaction().replace(R.id.id_kontejner_fragmenata, new MyEventsFragment())
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.id_kontejner_fragmenata, new MyEventsFragment())
                         .commit();
             }
         });
 
 
         subtitle = findViewById(R.id.id_events_activity_subtitle);
-        bundle = getIntent().getExtras();   // ovo obavezno zapamtiti
 
-        if (bundle!=null){  // ako nije prazan ako ima nesto unutra
-            String username = bundle.getString("username_kljuc");
+        // --- IZMENA: citanje iz SharedPreferences umesto Bundle-a ---
+        SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
+        String username = sp.getString("current_user", null);
+
+        if (username != null) {
             subtitle.setText(username);
+        } else {
+            subtitle.setText("Guest"); // Ako niko nije ulogovan, piše Guest
         }
-        else{
-            subtitle.setText("Error!");
-        }
-
-
 
     }
 }

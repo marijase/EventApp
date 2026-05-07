@@ -2,6 +2,7 @@ package marija.sekulic.eventsapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.content.SharedPreferences;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,14 +38,27 @@ public class RegisterActivity extends AppCompatActivity {
                 String email = rgs_email.getText().toString();
                 String password = rgs_password.getText().toString();
 
-                rgs_bundle = new Bundle();
-                rgs_bundle.putString("username_kljuc", username);
-                rgs_bundle.putString("email_kljuc", email);
-                rgs_bundle.putString("password_kljuc", password);
+                if (!email.contains("@")){
+                    rgs_email.setError("Invalid email format!");
+                    return;
+                }
+                if (password.length() < 8){
+                    rgs_password.setError("Password must be at least 8 characters!");
+                    //rgs_password.setText("");
+                    return;
+                }
+                // Upisivanje u SharedPreferences
+                SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putString("registered_username", username);
+                editor.putString("registered_password", password);
+                editor.putString("registered_email", email);
+                editor.apply(); // cuva sve odjednom
 
-                Intent open_events = new Intent(RegisterActivity.this, EventsActivity.class);
-                open_events.putExtras(rgs_bundle); // mora ovaj redosled prvo put pa onda START
-                startActivity(open_events);
+                // Prelazak na Login umesto na Events
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish(); // ne dozvoljava Back dugme da vrati unazad
 
             }
         });

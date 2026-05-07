@@ -6,4 +6,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="siva">#808080</color>
     <color name="siva_svetlija">#BEBEBE</color>
+    <color name="narandzasta_svetlija">#FFE5B4</color>
+    <color name="narandzasta_tamnija">#FF7518</color>
+
 </resources>
