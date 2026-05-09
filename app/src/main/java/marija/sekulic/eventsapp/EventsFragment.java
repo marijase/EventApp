@@ -25,20 +25,16 @@ public class EventsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
-
-        // RecyclerView inicijalizacija
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view_events);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         adapter = new EventAdapter(event -> {
-            // Prelaz na EventDetailsActivity
             Intent intent = new Intent(getActivity(), EventsActivity.class);
             intent.putExtra("EVENT_NAME", event.getName());
             startActivity(intent);
         });
         recyclerView.setAdapter(adapter);
 
-        // Dugme DODAJ EVENT
         Button btnAddEvent = view.findViewById(R.id.btn_add_event);
         btnAddEvent.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), CreateEventActivity.class);
@@ -46,7 +42,7 @@ public class EventsFragment extends Fragment {
             startActivity(intent);
         });
 
-        // Kategorije filtriranje
+        // filtriranje
         LinearLayout categoryContainer = view.findViewById(R.id.categories_container);
         setupCategories(categoryContainer);
 
@@ -78,7 +74,6 @@ public class EventsFragment extends Fragment {
     }
 
     private void updateList(String category) {
-        // Koristimo tvoje metode iz AppData za sortiranje i filtriranje
         adapter.setEvents(AppData.getSortedEventsByCategory(category));
     }
 

@@ -6,7 +6,6 @@
     android:orientation="horizontal"
     android:padding="8dp"
     android:layout_marginBottom="4dp"
-    android:background="@color/narandzasta_svetlija"
     >
 
     <LinearLayout
