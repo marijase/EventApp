@@ -52,6 +52,16 @@
     <!-- event_item -->
     <string name="str_featured">FEATURED</string>
 
-
+    <!-- activity_create_event-->
+    <string name="hint_event_name">Naziv događaja</string>
+    <string name="hint_description">Opis</string>
+    <string name="hint_location">Lokacija</string>
+    <string name="hint_datetime">dd.MM.yyyy HH:mm</string>
+    <string name="hint_capacity">Kapacitet</string>
+    <string name="label_promoted">Promoted event</string>
+    <string name="btn_create_event">KREIRAJ EVENT</string>
+    <string name="error_fields_empty">Popunite sva obavezna polja.</string>
+    <string name="error_invalid_capacity">Unesite ispravan kapacitet.</string>
+    <string name="success_created">Događaj uspešno kreiran.</string>
 
 </resources>

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/event_container"
+    android:id="@+id/item_container"
     android:orientation="horizontal"
     android:padding="8dp"
     android:layout_marginBottom="4dp"
@@ -25,6 +25,7 @@
             android:paddingRight="8dp"
             android:layout_gravity="center"
             android:background="@color/narandzasta_tamnija"
+            android:visibility="gone"
             />
         <ImageView
             android:id="@+id/img_event"
@@ -42,9 +43,9 @@
         android:orientation="vertical"
         >
         <TextView
-            android:id="@+id/txt_name"
+            android:id="@+id/txt_event_name"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:textSize="12sp"
             android:textColor="@android:color/black"
             android:textStyle="bold"
@@ -54,7 +55,7 @@
         <TextView
             android:id="@+id/txt_category"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:textColor="@color/ljubicasta_tamnija"
             android:layout_weight="1"
             android:gravity="start"
@@ -62,7 +63,7 @@
         <TextView
             android:id="@+id/txt_location"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:textColor="@color/siva"
             android:layout_weight="1"
             android:gravity="start"
@@ -70,7 +71,7 @@
         <TextView
             android:id="@+id/txt_date"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:textColor="@color/siva"
             android:layout_weight="1"
             android:gravity="start"
@@ -79,7 +80,7 @@
         <TextView
             android:id="@+id/txt_capacity"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:textColor="@color/narandzasta_tamnija"
             android:layout_weight="1"
             android:textStyle="bold"
