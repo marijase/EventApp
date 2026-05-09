@@ -1,13 +1,17 @@
 package marija.sekulic.eventsapp;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,9 +60,12 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         ImageView imgEvent;
         TextView txtName, txtCategory, txtLocation, txtDate, txtFeatured, txtSpaces;
         View container;
+        Button btnRate;
+        Context context;
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
+            context = itemView.getContext();
             imgEvent = itemView.findViewById(R.id.img_event);
             txtName = itemView.findViewById(R.id.txt_event_name);
             txtCategory = itemView.findViewById(R.id.txt_category);
@@ -67,6 +74,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             txtFeatured = itemView.findViewById(R.id.txt_featured);
             txtSpaces = itemView.findViewById(R.id.txt_capacity);
             container = itemView.findViewById(R.id.item_container); // Glavni layout u event_item.xml
+            btnRate = itemView.findViewById(R.id.btn_rate_item);
         }
 
         @SuppressLint("ResourceAsColor")
@@ -77,17 +85,39 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             txtDate.setText(event.getDateTime());
             imgEvent.setImageResource(event.getImageResId());
 
-            // Logika za Promoted događaje
+            if (imgEvent != null) {
+                imgEvent.setImageResource(event.getImageResId());
+            }
+
             if (event.isPromoted()) {
-                txtFeatured.setVisibility(View.VISIBLE);
-                txtSpaces.setVisibility(View.VISIBLE);
-                txtSpaces.setText("Slobodnih mesta: " + event.getAttendingCount() + "/" + event.getCapacity());
-                container.setBackgroundColor(R.color.narandzasta_svetlija); // Distinktivna boja pozadine
+                if (txtFeatured != null) txtFeatured.setVisibility(View.VISIBLE);
+                if (txtSpaces != null) {
+                    txtSpaces.setVisibility(View.VISIBLE);
+                    txtSpaces.setText("Slobodnih mesta: " + event.getAttendingCount() + "/" + event.getCapacity());
+                }
+                // Ispravan način postavljanja boje iz resursa 
+                container.setBackgroundColor(ContextCompat.getColor(context, R.color.narandzasta_svetlija));
             } else {
-                txtFeatured.setVisibility(View.GONE);
-                txtSpaces.setVisibility(View.GONE);
+                if (txtFeatured != null) txtFeatured.setVisibility(View.GONE);
+                if (txtSpaces != null) txtSpaces.setVisibility(View.GONE);
                 container.setBackgroundColor(Color.WHITE);
             }
+
+            if (event.isPast()) {
+                btnRate.setVisibility(View.VISIBLE);
+                // Sakrij sliku u ovoj sekciji prema vizuelnom zahtevu [cite: 162-179]
+                if (imgEvent != null) imgEvent.setVisibility(View.GONE);
+
+                btnRate.setOnClickListener(v -> {
+                    Intent intent = new Intent(context, RatingActivity.class);
+                    intent.putExtra("EVENT_NAME", event.getName()); // Prenos naziva
+                    context.startActivity(intent);
+                });
+            } else {
+                btnRate.setVisibility(View.GONE);
+                if (imgEvent != null) imgEvent.setVisibility(View.VISIBLE);
+            }
+
 
             itemView.setOnClickListener(v -> listener.onEventClick(event));
         }

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <include layout="@layout/header" />
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/img_details"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_launcher_background" />
+
+            <TextView
+                android:id="@+id/txt_details_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:paddingTop="12dp"
+                />
+
+            <TextView
+                android:id="@+id/txt_details_category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@color/ljubicasta_tamnija"
+                />
+
+            <TextView
+                android:id="@+id/txt_details_loc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/siva"
+                />
+
+            <TextView
+                android:id="@+id/txt_details_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/siva"
+                />
+
+            <TextView
+                android:id="@+id/txt_details_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:paddingTop="12dp"
+                />
+
+            <TextView
+                android:id="@+id/txt_details_capacity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@android:color/holo_orange_dark"
+                android:textStyle="bold"
+                android:paddingTop="8dp"
+                android:visibility="gone"
+                />
+
+            <TextView
+                android:id="@+id/txt_details_rating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:paddingTop="12dp"
+                />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <Button
+            android:id="@+id/btn_interested"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_interested"
+            android:backgroundTint="@color/ljubicasta_tamnija"
+            android:textColor="@color/white" />
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="1dp" />
+
+        <Button
+            android:id="@+id/btn_attending"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_attending"
+            android:backgroundTint="@color/ljubicasta_tamnija"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+</LinearLayout>

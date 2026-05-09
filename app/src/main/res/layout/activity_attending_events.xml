@@ -1,24 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/id_activity_attending"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".AttendingEventsActivity">
-    <include layout="@layout/header"></include>
+    android:background="@color/white">
 
-    <TextView
-        android:id="@+id/id_attending_events"
+    <include layout="@layout/header" />
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/attendind_events"
-        android:gravity="center"
-        android:textColor="@color/siva"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        >
-    </TextView>
+        android:fillViewport="true">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/txt_attending_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nemate prijavljenih događaja"
+                android:gravity="center"
+                android:padding="20dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/header_upcoming"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Predstojeći događaji"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:paddingBottom="8dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_upcoming"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+            <TextView
+                android:id="@+id/header_past"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Prošli događaji"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:paddingBottom="8dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_past"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

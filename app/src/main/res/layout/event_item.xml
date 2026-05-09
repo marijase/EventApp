@@ -86,5 +86,14 @@
             android:gravity="start"
             />
     </LinearLayout>
+    <Button
+        android:id="@+id/btn_rate_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_oceni"
+        android:visibility="gone"
+        android:backgroundTint="@color/ljubicasta_tamnija"
+        android:textColor="@color/white"
+        />
 
 </LinearLayout>

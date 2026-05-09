@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <include layout="@layout/header" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Oceni događaj"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/siva" />
+
+        <TextView
+            android:id="@+id/txt_rating_event_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Naziv događaja"
+            android:textSize="16sp"
+            android:textColor="@color/siva"
+            android:paddingBottom="24dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingBottom="24dp">
+
+            <ImageView
+                android:id="@+id/star1"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@android:drawable/btn_star_big_off" />
+
+            <ImageView
+                android:id="@+id/star2"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@android:drawable/btn_star_big_off" />
+
+            <ImageView
+                android:id="@+id/star3"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@android:drawable/btn_star_big_off" />
+
+            <ImageView
+                android:id="@+id/star4"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@android:drawable/btn_star_big_off" />
+
+            <ImageView
+                android:id="@+id/star5"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@android:drawable/btn_star_big_off" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_confirm_rating"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="POTVRDI OCENU"
+            android:backgroundTint="@color/ljubicasta_tamnija"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+</LinearLayout>

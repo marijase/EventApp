@@ -1,25 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/id_interested_activity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".InterestedEventsActivity"
-    >
-    <include layout="@layout/header"></include>
+    android:background="@color/white"
+    tools:context=".InterestedEventsActivity">
 
-    <TextView
-        android:id="@+id/id_interested_events"
+    <include layout="@layout/header" />
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="@string/interested_events"
-        android:textColor="@color/siva"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        >
-    </TextView>
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/id_interested_events_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/interested_events"
+            android:textColor="@color/siva"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_interested_events"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:scrollbars="vertical" />
+
+    </FrameLayout>
 
 </LinearLayout>

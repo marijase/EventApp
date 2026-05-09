@@ -64,4 +64,10 @@
     <string name="error_invalid_capacity">Unesite ispravan kapacitet.</string>
     <string name="success_created">Događaj uspešno kreiran.</string>
 
+    <!-- interested activity -->
+    <string name="btn_interested">INTERESTED</string>
+    <string name="btn_attending">ATTENDING</string>
+    <string name="btn_oceni">OCENI</string>
+
+
 </resources>
