@@ -3,7 +3,7 @@ package marija.sekulic.eventsapp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-//test
+//test2
 public class AppData {
     public static List<Event> allEvents = new ArrayList<>();
     public static List<Event> interestedEvents = new ArrayList<>();
