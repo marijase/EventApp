@@ -19,8 +19,8 @@ public class AttendingEventsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_attending_events);
 
         TextView txtEmpty = findViewById(R.id.txt_attending_empty);
-        LinearLayout sectionUpcoming = findViewById(R.id.rv_upcoming);
-        LinearLayout sectionPast = findViewById(R.id.rv_past);
+        RecyclerView sectionUpcoming = findViewById(R.id.rv_upcoming);
+        RecyclerView sectionPast = findViewById(R.id.rv_past);
 
         if (AppData.attendingEvents.isEmpty()) {
             txtEmpty.setVisibility(View.VISIBLE);
@@ -41,7 +41,7 @@ public class AttendingEventsActivity extends AppCompatActivity {
             else upcoming.add(e);
         }
 
-        // Predstojeći [cite: 145]
+        // Predstojeći
         if (!upcoming.isEmpty()) {
             RecyclerView rv = findViewById(R.id.rv_upcoming);
             rv.setLayoutManager(new LinearLayoutManager(this));
@@ -52,7 +52,7 @@ public class AttendingEventsActivity extends AppCompatActivity {
             findViewById(R.id.header_upcoming).setVisibility(View.GONE);
         }
 
-        // Prošli - Sa dugmetom OCENI [cite: 146]
+        // Prošli - Sa dugmetom OCENI
         if (!past.isEmpty()) {
             RecyclerView rv = findViewById(R.id.rv_past);
             rv.setLayoutManager(new LinearLayoutManager(this));

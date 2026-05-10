@@ -9,12 +9,16 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import android.app.DatePickerDialog;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class CreateEventActivity extends AppCompatActivity {
 
     private EditText etName, etDesc, etLoc, etDateTime, etCapacity;
     private Spinner spCategory;
     private CheckBox cbPromoted;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +45,23 @@ public class CreateEventActivity extends AppCompatActivity {
             etCapacity.setVisibility(isChecked ? View.VISIBLE : View.GONE);
         });
 
+        etDateTime.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog dialog = new DatePickerDialog(this,
+                    (view, y, m, d) -> {
+                        String date = String.format(Locale.getDefault(), "%02d.%02d.%d", d, m + 1, y);
+                        etDateTime.setText(date);
+                    }, year, month, day);
+
+            dialog.show();
+        });
         btnCreate.setOnClickListener(v -> validateAndCreate());
+
     }
 
     private void validateAndCreate() {
@@ -51,6 +71,7 @@ public class CreateEventActivity extends AppCompatActivity {
         String category = spCategory.getSelectedItem().toString();
         String desc = etDesc.getText().toString().trim();
         boolean isPromoted = cbPromoted.isChecked();
+        int image = EventFactory.getImageForCategory(category);
 
         // osnovna validacija
         if (name.isEmpty() || loc.isEmpty() || dateTime.isEmpty()) {
@@ -74,9 +95,9 @@ public class CreateEventActivity extends AppCompatActivity {
         // kreiranje objekta i dodavanje u AppData
         Event newEvent;
         if (isPromoted) {
-            newEvent = EventFactory.createPromotedEvent(name, desc, loc, dateTime, category, R.drawable.ic_launcher_background, capacity);
+            newEvent = EventFactory.createPromotedEvent(name, desc, loc, dateTime, category, image, capacity);
         } else {
-            newEvent = EventFactory.createRegularEvent(name, desc, loc, dateTime, category, R.drawable.ic_launcher_background);
+            newEvent = EventFactory.createRegularEvent(name, desc, loc, dateTime, category, image);
         }
 
         AppData.allEvents.add(newEvent);
