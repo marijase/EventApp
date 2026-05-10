@@ -1,11 +1,12 @@
 package marija.sekulic.eventsapp;
+import java.util.Date;
 
 public class EventFactory {
-    public static Event createRegularEvent(String name, String description, String location, String dateTime, String category, int imageResId) {
+    public static Event createRegularEvent(String name, String description, String location, Date dateTime, String category, int imageResId) {
         return new Event(name, description, location, dateTime, category, imageResId);
     }
 
-    public static Event createPromotedEvent(String name, String description, String location, String dateTime, String category, int imageResId, int capacity) {
+    public static Event createPromotedEvent(String name, String description, String location, Date dateTime, String category, int imageResId, int capacity) {
         return new Event(name, description, location, dateTime, category, imageResId, true, capacity, 0, 0.0, 0);
     }
 

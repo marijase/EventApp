@@ -1,18 +1,21 @@
 package marija.sekulic.eventsapp;
 
+import android.widget.Toast;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 public class Event {
-    private String name, description, location, dateTime, category;
+    private String name, description, location,  category;
     private int imageResId, capacity, attendingCount, ratingCount;
     private boolean isPromoted;
     private double averageRating;
+    private Date dateTime;
 
     // Konstruktor za promoted događaje
-    public Event(String name, String description, String location, String dateTime, String category,
+    public Event(String name, String description, String location, Date dateTime, String category,
                  int imageResId, boolean isPromoted, int capacity, int attendingCount,
                  double averageRating, int ratingCount) {
         this.name = name;
@@ -29,18 +32,12 @@ public class Event {
     }
 
     // Konstruktor za regularne događaje
-    public Event(String name, String description, String location, String dateTime, String category, int imageResId) {
+    public Event(String name, String description, String location, Date dateTime, String category, int imageResId) {
         this(name, description, location, dateTime, category, imageResId, false, 0, 0, 0.0, 0);
     }
 
     public boolean isPast() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
-        try {
-            Date eventDate = sdf.parse(this.dateTime);
-            return eventDate != null && eventDate.before(new Date());
-        } catch (ParseException e) {
-            return false;
-        }
+        return dateTime != null && dateTime.before(new Date());
     }
 
     public double addRating(int rating) {
@@ -54,7 +51,7 @@ public class Event {
     public String getName() { return name; }
     public String getDescription() { return description; }
     public String getLocation() { return location; }
-    public String getDateTime() { return dateTime; }
+    public Date getDateTime() { return dateTime; }
     public String getCategory() { return category; }
     public int getImageResId() { return imageResId; }
     public boolean isPromoted() { return isPromoted; }

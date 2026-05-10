@@ -10,8 +10,12 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.app.DatePickerDialog;
+
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Locale;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class CreateEventActivity extends AppCompatActivity {
 
@@ -46,19 +50,36 @@ public class CreateEventActivity extends AppCompatActivity {
         });
 
         etDateTime.setOnClickListener(v -> {
+
             Calendar calendar = Calendar.getInstance();
 
             int year = calendar.get(Calendar.YEAR);
             int month = calendar.get(Calendar.MONTH);
             int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-            DatePickerDialog dialog = new DatePickerDialog(this,
+            DatePickerDialog dateDialog = new DatePickerDialog(this,
                     (view, y, m, d) -> {
-                        String date = String.format(Locale.getDefault(), "%02d.%02d.%d", d, m + 1, y);
-                        etDateTime.setText(date);
+
+                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                        int minute = calendar.get(Calendar.MINUTE);
+
+                        android.app.TimePickerDialog timeDialog =
+                                new android.app.TimePickerDialog(this,
+                                        (timeView, h, min) -> {
+
+                                            String dateTime = String.format(Locale.getDefault(),
+                                                    "%02d.%02d.%d %02d:%02d",
+                                                    d, m + 1, y, h, min);
+
+                                            etDateTime.setText(dateTime);
+
+                                        }, hour, minute, true);
+
+                        timeDialog.show();
+
                     }, year, month, day);
 
-            dialog.show();
+            dateDialog.show();
         });
         btnCreate.setOnClickListener(v -> validateAndCreate());
 
@@ -72,6 +93,15 @@ public class CreateEventActivity extends AppCompatActivity {
         String desc = etDesc.getText().toString().trim();
         boolean isPromoted = cbPromoted.isChecked();
         int image = EventFactory.getImageForCategory(category);
+        Date parsedDate;
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
+            parsedDate = sdf.parse(dateTime);
+        } catch (ParseException e) {
+            Toast.makeText(this, "Neispravan format datuma", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         // osnovna validacija
         if (name.isEmpty() || loc.isEmpty() || dateTime.isEmpty()) {
@@ -95,9 +125,9 @@ public class CreateEventActivity extends AppCompatActivity {
         // kreiranje objekta i dodavanje u AppData
         Event newEvent;
         if (isPromoted) {
-            newEvent = EventFactory.createPromotedEvent(name, desc, loc, dateTime, category, image, capacity);
+            newEvent = EventFactory.createPromotedEvent(name, desc, loc, parsedDate, category, image, capacity);
         } else {
-            newEvent = EventFactory.createRegularEvent(name, desc, loc, dateTime, category, image);
+            newEvent = EventFactory.createRegularEvent(name, desc, loc, parsedDate, category, image);
         }
 
         AppData.allEvents.add(newEvent);

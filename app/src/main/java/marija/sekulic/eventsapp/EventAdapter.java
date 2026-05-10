@@ -15,6 +15,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
@@ -82,18 +84,18 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             txtName.setText(event.getName());
             txtCategory.setText(event.getCategory());
             txtLocation.setText(event.getLocation());
-            txtDate.setText(event.getDateTime());
+            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
+            txtDate.setText(sdf.format(event.getDateTime()));
             imgEvent.setImageResource(event.getImageResId());
 
-            if (imgEvent != null) {
-                imgEvent.setImageResource(event.getImageResId());
-            }
+
 
             if (event.isPromoted()) {
                 if (txtFeatured != null) txtFeatured.setVisibility(View.VISIBLE);
                 if (txtSpaces != null) {
                     txtSpaces.setVisibility(View.VISIBLE);
-                    txtSpaces.setText("Slobodnih mesta: " + event.getAttendingCount() + "/" + event.getCapacity());
+                    int left = event.getCapacity() - event.getAttendingCount();
+                    txtSpaces.setText("Slobodnih mesta: " + left + "/" + event.getCapacity());
                 }
                 // Ispravan način postavljanja boje iz resursa 
                 container.setBackgroundColor(ContextCompat.getColor(context, R.color.narandzasta_svetlija));

@@ -7,8 +7,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class EventDetailsActivity extends AppCompatActivity {
+    private final SimpleDateFormat sdf =
+            new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +44,11 @@ public class EventDetailsActivity extends AppCompatActivity {
         txtName.setText(event.getName());
         txtDesc.setText(event.getDescription());
         txtLoc.setText(event.getLocation());
-        txtDate.setText(event.getDateTime());
+        if (event.getDateTime() != null) {
+            txtDate.setText(sdf.format(event.getDateTime()));
+        } else {
+            txtDate.setText("Datum nije dostupan");
+        }
 
         // Prikaz kapaciteta samo za promoted [cite: 96]
         if (event.isPromoted()) {
