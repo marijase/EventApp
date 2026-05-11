@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
                     lgn_username.setText("");
                     lgn_password.setText("");
                     lgn_username.requestFocus();
-                    Toast t = Toast.makeText(LoginActivity.this, "Email or password wrong! Try again.",
+                    Toast t = Toast.makeText(LoginActivity.this, "Username or password wrong! Try again.",
                                     Toast.LENGTH_SHORT);
                     t.setGravity(Gravity.CENTER, 0, 0);
                     t.show();

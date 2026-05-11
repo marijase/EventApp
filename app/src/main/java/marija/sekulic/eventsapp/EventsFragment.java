@@ -29,7 +29,7 @@ public class EventsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         adapter = new EventAdapter(event -> {
-            Intent intent = new Intent(getActivity(), EventsActivity.class);
+            Intent intent = new Intent(getActivity(), EventDetailsActivity.class);
             intent.putExtra("EVENT_NAME", event.getName());
             startActivity(intent);
         });

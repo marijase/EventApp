@@ -14,7 +14,7 @@ public class Event {
     private double averageRating;
     private Date dateTime;
 
-    // Konstruktor za promoted događaje
+    // promoted
     public Event(String name, String description, String location, Date dateTime, String category,
                  int imageResId, boolean isPromoted, int capacity, int attendingCount,
                  double averageRating, int ratingCount) {
@@ -31,7 +31,7 @@ public class Event {
         this.ratingCount = ratingCount;
     }
 
-    // Konstruktor za regularne događaje
+    //  regularni
     public Event(String name, String description, String location, Date dateTime, String category, int imageResId) {
         this(name, description, location, dateTime, category, imageResId, false, 0, 0, 0.0, 0);
     }

@@ -11,7 +11,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.app.DatePickerDialog;
 
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
@@ -79,6 +78,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
                     }, year, month, day);
 
+            dateDialog.getDatePicker().setMinDate(System.currentTimeMillis());
             dateDialog.show();
         });
         btnCreate.setOnClickListener(v -> validateAndCreate());
@@ -93,24 +93,28 @@ public class CreateEventActivity extends AppCompatActivity {
         String desc = etDesc.getText().toString().trim();
         boolean isPromoted = cbPromoted.isChecked();
         int image = EventFactory.getImageForCategory(category);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
         Date parsedDate;
 
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
             parsedDate = sdf.parse(dateTime);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             Toast.makeText(this, "Neispravan format datuma", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // osnovna validacija
+        // provera prošlosti
+        if (parsedDate.before(new Date())) {
+            Toast.makeText(this, "Ne možete uneti prošli datum", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (name.isEmpty() || loc.isEmpty() || dateTime.isEmpty()) {
             Toast.makeText(this, "Popunite sva obavezna polja.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         int capacity = 0;
-        // validacija kapaciteta za promoted
         if (isPromoted) {
             String capStr = etCapacity.getText().toString().trim();
             try {
