@@ -4,7 +4,9 @@ import android.widget.Toast;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class Event {
@@ -13,6 +15,8 @@ public class Event {
     private boolean isPromoted;
     private double averageRating;
     private Date dateTime;
+    private List<Integer> ratings = new ArrayList<>();
+    private boolean rated = false;
 
     // promoted
     public Event(String name, String description, String location, Date dateTime, String category,
@@ -40,6 +44,8 @@ public class Event {
         return dateTime != null && dateTime.before(new Date());
     }
 
+    public boolean isNext() { return dateTime != null && dateTime.after(new Date()); }
+
     public double addRating(int rating) {
         double totalScore = averageRating * ratingCount;
         ratingCount++;
@@ -47,7 +53,8 @@ public class Event {
         return averageRating;
     }
 
-    // Geteri i Seteri
+
+
     public String getName() { return name; }
     public String getDescription() { return description; }
     public String getLocation() { return location; }
@@ -55,8 +62,11 @@ public class Event {
     public String getCategory() { return category; }
     public int getImageResId() { return imageResId; }
     public boolean isPromoted() { return isPromoted; }
+
     public int getCapacity() { return capacity; }
     public int getAttendingCount() { return attendingCount; }
     public double getAverageRating() { return averageRating; }
     public int getRatingCount() { return ratingCount; }
+    public boolean isRated() { return rated;}
+    public void setRated(boolean rated) { this.rated = rated; }
 }

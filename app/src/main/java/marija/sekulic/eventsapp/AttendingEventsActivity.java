@@ -45,7 +45,7 @@ public class AttendingEventsActivity extends AppCompatActivity {
         if (!upcoming.isEmpty()) {
             RecyclerView rv = findViewById(R.id.rv_upcoming);
             rv.setLayoutManager(new LinearLayoutManager(this));
-            EventAdapter adapter = new EventAdapter(this::openDetails);
+            EventAdapter adapter = new EventAdapter(this::openDetails, true);
             adapter.setEvents(upcoming);
             rv.setAdapter(adapter);
         } else {
@@ -57,7 +57,7 @@ public class AttendingEventsActivity extends AppCompatActivity {
             RecyclerView rv = findViewById(R.id.rv_past);
             rv.setLayoutManager(new LinearLayoutManager(this));
             // Koristi poseban adapter ili modifikuj postojeći za dugme "OCENI"
-            EventAdapter adapter = new EventAdapter(this::openRating);
+            EventAdapter adapter = new EventAdapter(this::openDetails, true);
             adapter.setEvents(past);
             rv.setAdapter(adapter);
         } else {

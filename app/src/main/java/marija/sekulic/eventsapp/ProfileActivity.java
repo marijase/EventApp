@@ -33,8 +33,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
 
-        // Uzimamo podatke (ako ih nema, ispisaće "N/A"  - ova if logika skrivena je u getString metodi)
-        // getString trazi u memoriji kljuc pod nazivom "current_user".
         user_name = sp.getString("current_user", "Not Available");
         mail_name = sp.getString("current_email", "Not Available");
 
@@ -56,7 +54,6 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                // Brisemo ko je trenutno ulogovan da bi sesija bila cista
                 SharedPreferences.Editor editor = sp.edit();
                 editor.remove("current_user");
                 editor.remove("current_email");

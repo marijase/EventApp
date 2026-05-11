@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,13 +24,27 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
     private List<Event> events = new ArrayList<>();
     private final OnEventClickListener listener;
+    private OnRateClickListener rateListener;
+    private boolean attendingMode = false;
+    public void setAttendingMode(boolean attendingMode) { // new
+        this.attendingMode = attendingMode;
+    }
 
     public interface OnEventClickListener {
         void onEventClick(Event event);
     }
+    public interface OnRateClickListener {
+        void onRateClick(Event event);
+    }
 
     public EventAdapter(OnEventClickListener listener) {
         this.listener = listener;
+    }
+
+
+    public EventAdapter(OnEventClickListener listener, boolean attendingMode) {
+        this.listener = listener;
+        this.attendingMode = attendingMode;
     }
 
     @NonNull
@@ -40,7 +56,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
-        holder.bind(events.get(position), listener);
+        holder.bind(events.get(position), listener, attendingMode);
     }
 
     @Override
@@ -53,10 +69,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         notifyDataSetChanged();
     }
 
-    public void clearAll() {
-        this.events.clear();
-        notifyDataSetChanged();
-    }
 
     public static class EventViewHolder extends RecyclerView.ViewHolder {
         ImageView imgEvent;
@@ -79,15 +91,23 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             btnRate = itemView.findViewById(R.id.btn_rate_item);
         }
 
+
+
         @SuppressLint("ResourceAsColor")
-        public void bind(final Event event, final OnEventClickListener listener) {
+        public void bind(final Event event, final OnEventClickListener listener, boolean attendingMode) {
+            Toast.makeText(context, "attendingMode=" + attendingMode + " isPast=" + event.isPast(), Toast.LENGTH_SHORT).show();
             txtName.setText(event.getName());
+
             txtCategory.setText(event.getCategory());
             txtLocation.setText(event.getLocation());
             SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
-            txtDate.setText(sdf.format(event.getDateTime()));
             imgEvent.setImageResource(event.getImageResId());
 
+            if (event.getDateTime() != null) {
+                txtDate.setText(sdf.format(event.getDateTime()));
+            } else {
+                txtDate.setText(""); // FIX da ne puca
+            }
 
 
             if (event.isPromoted()) {
@@ -97,7 +117,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                     int left = event.getCapacity() - event.getAttendingCount();
                     txtSpaces.setText("Slobodnih mesta: " + left + "/" + event.getCapacity());
                 }
-                // Ispravan način postavljanja boje iz resursa 
+                // Ispravan način postavljanja boje iz resursa
                 container.setBackgroundColor(ContextCompat.getColor(context, R.color.narandzasta_svetlija));
             } else {
                 if (txtFeatured != null) txtFeatured.setVisibility(View.GONE);
@@ -105,23 +125,22 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 container.setBackgroundColor(Color.WHITE);
             }
 
-            if (event.isPast()) {
+            if (attendingMode && event.isPast()) {
                 btnRate.setVisibility(View.VISIBLE);
-                // Sakrij sliku u ovoj sekciji prema vizuelnom zahtevu [cite: 162-179]
-                if (imgEvent != null) imgEvent.setVisibility(View.GONE);
+                imgEvent.setVisibility(View.GONE);
 
                 btnRate.setOnClickListener(v -> {
                     Intent intent = new Intent(context, RatingActivity.class);
-                    intent.putExtra("EVENT_NAME", event.getName()); // Prenos naziva
+                    intent.putExtra("EVENT_NAME", event.getName());
                     context.startActivity(intent);
                 });
             } else {
                 btnRate.setVisibility(View.GONE);
-                if (imgEvent != null) imgEvent.setVisibility(View.VISIBLE);
             }
 
 
             itemView.setOnClickListener(v -> listener.onEventClick(event));
+
         }
     }
 }

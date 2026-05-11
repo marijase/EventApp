@@ -21,32 +21,38 @@ public class RatingActivity extends AppCompatActivity {
         txtEventName = findViewById(R.id.txt_rating_event_name);
         Button btnConfirm = findViewById(R.id.btn_confirm_rating);
 
-        // Inicijalizacija zvezdica
         stars[0] = findViewById(R.id.star1);
         stars[1] = findViewById(R.id.star2);
         stars[2] = findViewById(R.id.star3);
         stars[3] = findViewById(R.id.star4);
         stars[4] = findViewById(R.id.star5);
 
-        // Preuzimanje imena eventa
         String eventName = getIntent().getStringExtra("EVENT_NAME");
         if (eventName != null) {
             txtEventName.setText(eventName);
         }
 
-        // Postavljanje click listenera za svaku zvezdicu
         for (int i = 0; i < stars.length; i++) {
             final int index = i;
             stars[i].setOnClickListener(v -> updateStars(index + 1));
         }
 
         btnConfirm.setOnClickListener(v -> {
-            if (currentRating == 0) {
-                Toast.makeText(this, "Molimo odaberite ocenu", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Ocenili ste sa: " + currentRating, Toast.LENGTH_SHORT).show();
-                finish(); // Zatvara aktivnost
+
+            Event event = AppData.findByName(eventName);
+
+            if (event != null) {
+
+                if (event.isRated()) { // DODATO
+                    Toast.makeText(this, "Već ste ocenili ovaj događaj", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                event.addRating(currentRating);
+                event.setRated(true); // DODATO
             }
+
+            finish();
         });
     }
 

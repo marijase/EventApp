@@ -32,13 +32,11 @@ public class PasswordActivity extends AppCompatActivity {
                 String user = sp.getString("current_user", "");
                 String old_password = sp.getString("current_password", "");
 
-                //  Provera da li je korisnik išta uneo
                 if (currentInput.isEmpty() || newInput.isEmpty()) {
                     Toast.makeText(PasswordActivity.this, "Popunite sva polja!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                //  Provera da li je uneta trenutna lozinka ispravna
                 if (!currentInput.equals(old_password)) {
                     current_pass.setError("Trenutna lozinka nije tačna!");
                     current_pass.setText("");
@@ -47,7 +45,6 @@ public class PasswordActivity extends AppCompatActivity {
                     return;
                 }
 
-                //  Validacija nove lozinke (minimum 8 karaktera)
                 if (newInput.length() < 8) {
                     new_password.setError("Nova lozinka mora imati bar 8 karaktera!");
                     new_password.setText("");

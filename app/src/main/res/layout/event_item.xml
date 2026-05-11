@@ -6,13 +6,12 @@
     android:orientation="horizontal"
     android:padding="8dp"
     android:layout_marginBottom="4dp"
-    >
+    android:gravity="center_vertical">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
         <TextView
             android:id="@+id/txt_featured"
             android:layout_width="wrap_content"
@@ -24,23 +23,21 @@
             android:paddingRight="8dp"
             android:layout_gravity="center"
             android:background="@color/narandzasta_tamnija"
-            android:visibility="gone"
-            />
+            android:visibility="gone"/>
         <ImageView
             android:id="@+id/img_event"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:scaleType="centerCrop"
-            android:src="@android:drawable/ic_menu_gallery"
-            />
+            android:src="@android:drawable/ic_menu_gallery"/>
     </LinearLayout>
 
-
+    <!-- new: layout_width="0dp" i layout_weight="1" da ne gura dugme van ekrana -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        >
+        android:layout_weight="1"
+        android:orientation="vertical">
         <TextView
             android:id="@+id/txt_event_name"
             android:layout_width="match_parent"
@@ -49,33 +46,28 @@
             android:textColor="@android:color/black"
             android:textStyle="bold"
             android:layout_weight="1"
-            android:gravity="start"
-            />
+            android:gravity="start"/>
         <TextView
             android:id="@+id/txt_category"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:textColor="@color/ljubicasta_tamnija"
             android:layout_weight="1"
-            android:gravity="start"
-            />
+            android:gravity="start"/>
         <TextView
             android:id="@+id/txt_location"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:textColor="@color/siva"
             android:layout_weight="1"
-            android:gravity="start"
-            />
+            android:gravity="start"/>
         <TextView
             android:id="@+id/txt_date"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:textColor="@color/siva"
             android:layout_weight="1"
-            android:gravity="start"
-            />
-        <!--android:visibility="gone"-->
+            android:gravity="start"/>
         <TextView
             android:id="@+id/txt_capacity"
             android:layout_width="match_parent"
@@ -83,17 +75,18 @@
             android:textColor="@color/narandzasta_tamnija"
             android:layout_weight="1"
             android:textStyle="bold"
-            android:gravity="start"
-            />
+            android:gravity="start"/>
     </LinearLayout>
+
+    <!-- new: layout_gravity="center_vertical" da bude vertikalno centriran -->
     <Button
         android:id="@+id/btn_rate_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:text="@string/btn_oceni"
         android:visibility="gone"
         android:backgroundTint="@color/ljubicasta_tamnija"
-        android:textColor="@color/white"
-        />
+        android:textColor="@color/white"/>
 
 </LinearLayout>
