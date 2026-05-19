@@ -2,10 +2,11 @@ package marija.sekulic.eventsapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.content.SharedPreferences;
+//import android.content.SharedPreferences;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +39,15 @@ public class RegisterActivity extends AppCompatActivity {
                 String email = rgs_email.getText().toString();
                 String password = rgs_password.getText().toString();
 
+                if (username.isEmpty()) {
+                    rgs_username.setError("Username cannot be empty!");
+                    return;
+                }
+                if (email.isEmpty()) {
+                    rgs_email.setError("Email cannot be empty!");
+                    Toast.makeText(RegisterActivity.this, "Email je obavezno polje!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (!email.contains("@")){
                     rgs_email.setError("Invalid email format!");
                     return;
@@ -48,20 +58,27 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
                 // Upisivanje u SharedPreferences
-                SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putString("registered_username", username);
-                editor.putString("registered_password", password);
-                editor.putString("registered_email", email);
-                editor.apply(); // cuva sve odjednom
+//                SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
+//                SharedPreferences.Editor editor = sp.edit();
+//                editor.putString("registered_username", username);
+//                editor.putString("registered_password", password);
+//                editor.putString("registered_email", email);
+//                editor.apply(); // cuva sve odjednom
+
+                UserDAO userDAO = new UserDAO(RegisterActivity.this);
+                boolean uspesnoReg = userDAO.registerUser(username, email, password);
+
+                if (uspesnoReg) {
+                    Toast.makeText(RegisterActivity.this, "Registracija uspešna!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(RegisterActivity.this, "Korisničko ime ili email već postoje!", Toast.LENGTH_SHORT).show();
+                }
 
                 // Prelazak na Login umesto na Events
                 Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                 startActivity(intent);
                 finish(); // ne dozvoljava Back dugme da vrati unazad
-
             }
         });
-
     }
 }
