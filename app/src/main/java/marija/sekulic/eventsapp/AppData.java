@@ -41,30 +41,24 @@ public class AppData {
         allEvents.add(EventFactory.createRegularEvent("Punk Rock Show", "Energija na bini", "Kragujevac", d("25.07.2026 22:00"), "CONCERT", EventFactory.getImageForCategory("CONCERT")));
         allEvents.add(EventFactory.createRegularEvent("Magic Show", "Trikovi i iluzije", "Subotica", d("30.07.2026 20:00"), "STAND-UP & THEATER", EventFactory.getImageForCategory("STAND-UP & THEATER")));
 
-// 2. INTERESTED
-        interestedEvents.add(allEvents.get(0));
-        interestedEvents.add(allEvents.get(6));
-        interestedEvents.add(allEvents.get(8));
-        interestedEvents.add(allEvents.get(10));
-        interestedEvents.add(allEvents.get(12));
-// 3. ATTENDING
-        attendingEvents.add(allEvents.get(0));
-        attendingEvents.add(allEvents.get(2));
-        attendingEvents.add(allEvents.get(3));
-        attendingEvents.add(allEvents.get(7));
-        attendingEvents.add(allEvents.get(8));
-        attendingEvents.add(allEvents.get(4));
-        attendingEvents.add(allEvents.get(1));
-        attendingEvents.add(allEvents.get(5));
+//// 2. INTERESTED
+//        interestedEvents.add(allEvents.get(0));
+//        interestedEvents.add(allEvents.get(6));
+//        interestedEvents.add(allEvents.get(8));
+//        interestedEvents.add(allEvents.get(10));
+//        interestedEvents.add(allEvents.get(12));
+//// 3. ATTENDING
+//        attendingEvents.add(allEvents.get(0));
+//        attendingEvents.add(allEvents.get(2));
+//        attendingEvents.add(allEvents.get(3));
+//        attendingEvents.add(allEvents.get(7));
+//        attendingEvents.add(allEvents.get(8));
+//        attendingEvents.add(allEvents.get(4));
+//        attendingEvents.add(allEvents.get(1));
+//        attendingEvents.add(allEvents.get(5));
     }
 
-    private static Date parse(String date) {
-        try {
-            return sdf.parse(date);
-        } catch (ParseException e) {
-            return new Date();
-        }
-    }
+
     private static Date d(String value) {
         try {
             return new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).parse(value);
@@ -74,32 +68,32 @@ public class AppData {
     }
 
     // promoted idu na vrh
-    public static List<Event> getSortedEvents() {
-        List<Event> sorted = new ArrayList<>(allEvents);
-        sorted.sort(Comparator.comparing(Event::isPromoted).reversed());
-        return sorted;
-    }
+//    public static List<Event> getSortedEvents() {
+//        List<Event> sorted = new ArrayList<>(allEvents);
+//        sorted.sort(Comparator.comparing(Event::isPromoted).reversed());
+//        return sorted;
+//    }
 
     // promoted idu na vrh
-    public static List<Event> getSortedEventsByCategory(String category) {
-        if (category.equalsIgnoreCase("SVE")) return getSortedEvents();
-
-        List<Event> filtered = new ArrayList<>();
-        for (Event e : allEvents) {
-            if (e.getCategory().equalsIgnoreCase(category)) {
-                filtered.add(e);
-            }
-        }
-        filtered.sort(Comparator.comparing(Event::isPromoted).reversed());
-        return filtered;
-    }
-    public static Event findByName(String name) {
-        for (Event e : allEvents) {
-            if (e.getName().equalsIgnoreCase(name)) {
-                return e;
-            }
-        }
-        return null;
-    }
+//    public static List<Event> getSortedEventsByCategory(String category) {
+//        if (category.equalsIgnoreCase("SVE")) return getSortedEvents();
+//
+//        List<Event> filtered = new ArrayList<>();
+//        for (Event e : allEvents) {
+//            if (e.getCategory().equalsIgnoreCase(category)) {
+//                filtered.add(e);
+//            }
+//        }
+//        filtered.sort(Comparator.comparing(Event::isPromoted).reversed());
+//        return filtered;
+//    }
+//    public static Event findByName(String name) {
+//        for (Event e : allEvents) {
+//            if (e.getName().equalsIgnoreCase(name)) {
+//                return e;
+//            }
+//        }
+//        return null;
+//    }
 
 }

@@ -1,8 +1,5 @@
 package marija.sekulic.eventsapp;
 
-import android.widget.Toast;
-
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +14,7 @@ public class Event {
     private Date dateTime;
     private List<Integer> ratings = new ArrayList<>();
     private boolean rated = false;
+    private int id;   // Kada pređemo na rad sa bazom podataka, svaki događaj mora imati svoj jedinstveni id
 
     // promoted
     public Event(String name, String description, String location, Date dateTime, String category,
@@ -69,4 +67,6 @@ public class Event {
     public int getRatingCount() { return ratingCount; }
     public boolean isRated() { return rated;}
     public void setRated(boolean rated) { this.rated = rated; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 }
