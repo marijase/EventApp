@@ -117,37 +117,36 @@ public class EventDAO {
         Cursor cursor = db.rawQuery(upit, null);
 
         if (cursor.moveToFirst()) {
-            String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-            String desc = cursor.getString(cursor.getColumnIndexOrThrow("description"));
-            String loc = cursor.getString(cursor.getColumnIndexOrThrow("location"));
-            String cat = cursor.getString(cursor.getColumnIndexOrThrow("category"));
-            long dateMillis = cursor.getLong(cursor.getColumnIndexOrThrow("date_time"));
-            int img = cursor.getInt(cursor.getColumnIndexOrThrow("image_res_id"));
-            int isPromotedInt = cursor.getInt(cursor.getColumnIndexOrThrow("is_promoted"));
+            String name = cursor.getString(cursor.getColumnIndexOrThrow("naziv"));
+            String desc = cursor.getString(cursor.getColumnIndexOrThrow("opis"));
+            String loc = cursor.getString(cursor.getColumnIndexOrThrow("lokacija"));
+            String cat = cursor.getString(cursor.getColumnIndexOrThrow("kategorija"));
+            //long dateMillis = cursor.getLong(cursor.getColumnIndexOrThrow("date_time"));
+            //int img = cursor.getInt(cursor.getColumnIndexOrThrow("image_res_id"));
+            int isPromotedInt = cursor.getInt(cursor.getColumnIndexOrThrow("promoted"));
             boolean isPromoted = (isPromotedInt == 1);
-            int capacity = cursor.getInt(cursor.getColumnIndexOrThrow("capacity"));
-            int attendingCount = cursor.getInt(cursor.getColumnIndexOrThrow("attending_count"));
-            double averageRating = cursor.getDouble(cursor.getColumnIndexOrThrow("average_rating"));
-            int ratingCount = cursor.getInt(cursor.getColumnIndexOrThrow("rating_count"));
+            int capacity = cursor.getInt(cursor.getColumnIndexOrThrow("kapacitet"));
+            int attendingCount = cursor.getInt(cursor.getColumnIndexOrThrow("brojPrisutnih"));
+            double averageRating = cursor.getDouble(cursor.getColumnIndexOrThrow("prosecnaOcena"));
+            int ratingCount = cursor.getInt(cursor.getColumnIndexOrThrow("brojOcena"));
+
+
+            Date date;
+            try {
+                String dateStr = cursor.getString(cursor.getColumnIndexOrThrow("datumVreme"));
+                date = sdf.parse(dateStr);
+            } catch (Exception e) {
+                date = null;
+            }
 
             cursor.close();
             db.close();
 
-            Event e;
-
-            // Biramo koji konstruktor pozivamo
-            if (isPromoted) {
-                // Ako je promovisan, koristimo pun konstruktor sa svim parametrima
-                e = new Event(name, desc, loc, new Date(dateMillis), cat, img, true, capacity, attendingCount, averageRating, ratingCount);
-            } else {
-                // Ako je običan, koristimo tvoj kraći konstruktor
-                e = new Event(name, desc, loc, new Date(dateMillis), cat, img);
-            }
-
-            // 4. Na samom kraju mu obavezno lepimo ID koji smo prosledili metodi
+            Event e = new Event(name, desc, loc, date, cat,
+                    EventFactory.getImageForCategory(cat), isPromoted, capacity,
+                    attendingCount, averageRating, ratingCount);
             e.setId(id);
-
-            return e; // Vraćamo kompletno napunjen objekat
+            return e;
         }
 
         if (cursor != null) cursor.close();

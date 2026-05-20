@@ -117,4 +117,18 @@ public class UserDAO {
         // Vraća true ako je uspešno izmenjen bar jedan red u bazi (to znači da je uspeo update)
         return rows > 0;
     }
+    public int getUserIdByUsername(String username) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT id FROM users WHERE username = ?",
+                new String[]{username});
+        if (cursor.moveToFirst()) {
+            int id = cursor.getInt(0);
+            cursor.close();
+            db.close();
+            return id;
+        }
+        cursor.close();
+        db.close();
+        return -1;
+    }
 }

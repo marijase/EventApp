@@ -1,6 +1,7 @@
 package marija.sekulic.eventsapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -17,63 +18,71 @@ public class AttendingEventsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attending_events);
-
-        TextView txtEmpty = findViewById(R.id.txt_attending_empty);
-        RecyclerView sectionUpcoming = findViewById(R.id.rv_upcoming);
-        RecyclerView sectionPast = findViewById(R.id.rv_past);
-
-        if (AppData.attendingEvents.isEmpty()) {
-            txtEmpty.setVisibility(View.VISIBLE);
-            sectionUpcoming.setVisibility(View.GONE);
-            sectionPast.setVisibility(View.GONE);
-        } else {
-            txtEmpty.setVisibility(View.GONE);
-            setupRecyclerViews();
-        }
     }
 
-    private void setupRecyclerViews() {
-        List<Event> upcoming = new ArrayList<>();
-        List<Event> past = new ArrayList<>();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupUI();
+    }
 
-        for (Event e : AppData.attendingEvents) {
+    private void setupUI() {
+        TextView txtEmpty = findViewById(R.id.txt_attending_empty);
+        RecyclerView rvUpcoming = findViewById(R.id.rv_upcoming);
+        RecyclerView rvPast = findViewById(R.id.rv_past);
+
+        SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
+        String currentUsername = sp.getString("current_user", "");
+        UserDAO userDAO = new UserDAO(this);
+        int userId = userDAO.getUserIdByUsername(currentUsername);
+
+        AttendanceDAO attendanceDAO = new AttendanceDAO(this);
+        EventDAO eventDAO = new EventDAO(this);
+
+        List<Event> upcoming = attendanceDAO.getAttendingEvents(userId);
+
+        // svi prošli eventi iz baze automatski idu u past sekciju (tvoj zahtev)
+        List<Event> sviEventi = eventDAO.getAllEvents();
+        List<Event> past = new ArrayList<>();
+        for (Event e : sviEventi) {
             if (e.isPast()) past.add(e);
-            else upcoming.add(e);
         }
 
-        // Predstojeći
+        boolean imaIcega = !upcoming.isEmpty() || !past.isEmpty();
+
+        if (!imaIcega) {
+            txtEmpty.setVisibility(View.VISIBLE);
+            rvUpcoming.setVisibility(View.GONE);
+            rvPast.setVisibility(View.GONE);
+            return;
+        }
+
+        txtEmpty.setVisibility(View.GONE);
+
         if (!upcoming.isEmpty()) {
-            RecyclerView rv = findViewById(R.id.rv_upcoming);
-            rv.setLayoutManager(new LinearLayoutManager(this));
-            EventAdapter adapter = new EventAdapter(this::openDetails, true);
+            rvUpcoming.setLayoutManager(new LinearLayoutManager(this));
+            EventAdapter adapter = new EventAdapter(this::openDetails, false);
             adapter.setEvents(upcoming);
-            rv.setAdapter(adapter);
+            rvUpcoming.setAdapter(adapter);
         } else {
             findViewById(R.id.header_upcoming).setVisibility(View.GONE);
+            rvUpcoming.setVisibility(View.GONE);
         }
 
-        // Prošli - Sa dugmetom OCENI
         if (!past.isEmpty()) {
-            RecyclerView rv = findViewById(R.id.rv_past);
-            rv.setLayoutManager(new LinearLayoutManager(this));
-            // Koristi poseban adapter ili modifikuj postojeći za dugme "OCENI"
+            rvPast.setLayoutManager(new LinearLayoutManager(this));
             EventAdapter adapter = new EventAdapter(this::openDetails, true);
             adapter.setEvents(past);
-            rv.setAdapter(adapter);
+            rvPast.setAdapter(adapter);
         } else {
             findViewById(R.id.header_past).setVisibility(View.GONE);
+            rvPast.setVisibility(View.GONE);
         }
     }
 
     private void openDetails(Event e) {
         Intent intent = new Intent(this, EventDetailsActivity.class);
-        intent.putExtra("EVENT_NAME", e.getName());
-        startActivity(intent);
-    }
-
-    private void openRating(Event e) {
-        Intent intent = new Intent(this, RatingActivity.class);
-        intent.putExtra("EVENT_NAME", e.getName());
+        intent.putExtra("EVENT_ID", e.getId()); // ispravljeno sa EVENT_NAME na EVENT_ID
         startActivity(intent);
     }
 }

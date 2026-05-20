@@ -1,5 +1,6 @@
 package marija.sekulic.eventsapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -76,18 +77,24 @@ public class EventDetailsActivity extends AppCompatActivity {
 
         } else {
 
+            SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
+            String currentUsername = sp.getString("current_user", "");
+            UserDAO userDAO = new UserDAO(this);
+            int userId = userDAO.getUserIdByUsername(currentUsername);
+            AttendanceDAO attendanceDAO = new AttendanceDAO(this);
+
             btnInterested.setOnClickListener(v -> {
-                if (!AppData.interestedEvents.contains(trenutniEvent)) {
-                    AppData.interestedEvents.add(trenutniEvent);
+                boolean uspelo = attendanceDAO.setInterested(userId, trenutniEvent.getId());
+                if (uspelo) {
+                    Toast.makeText(this, "Dodat u zainteresovane.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Već ste zainteresovani za ovaj događaj.", Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(this, "Dodat u zainteresovane.", Toast.LENGTH_SHORT).show();
             });
 
             btnAttending.setOnClickListener(v -> {
-                if (!AppData.attendingEvents.contains(trenutniEvent)) {
-                    AppData.attendingEvents.add(trenutniEvent);
-                }
-                Toast.makeText(this, "Prijavili ste se na događaj.", Toast.LENGTH_SHORT).show();
+                String poruka = attendanceDAO.setAttending(userId, trenutniEvent.getId());
+                Toast.makeText(this, poruka, Toast.LENGTH_SHORT).show();
             });
         }
     }

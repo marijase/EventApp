@@ -34,7 +34,7 @@ public class EventsFragment extends Fragment {
 
         adapter = new EventAdapter(event -> {
             Intent intent = new Intent(getActivity(), EventDetailsActivity.class);
-            intent.putExtra("event_id", event.getId());
+                intent.putExtra("EVENT_ID", event.getId());
             startActivity(intent);
         });
         recyclerView.setAdapter(adapter);
@@ -55,7 +55,7 @@ public class EventsFragment extends Fragment {
 
         return view;
     }
-
+    private String aktivnaKategorija = "SVE";
     private void setupCategories(LinearLayout container) {
         String[] categories = {"SVE", "FESTIVAL", "PARTY", "CONCERT", "EXHIBITION", "STAND-UP & THEATER"};
 
@@ -68,6 +68,7 @@ public class EventsFragment extends Fragment {
             btn.setAllCaps(true);
 
             btn.setOnClickListener(v -> {
+                aktivnaKategorija = cat; // ← dodato
                 updateList(cat);
                 highlightActiveButton(btn);
             });
@@ -75,6 +76,11 @@ public class EventsFragment extends Fragment {
             categoryButtons.add(btn);
         }
             highlightActiveButton(categoryButtons.get(0));
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateList(aktivnaKategorija);
     }
 
     private void updateList(String category) {

@@ -54,13 +54,17 @@ public class Event {
 
 
     public String getName() { return name; }
+    public void setName(String name) { this.name = name;}
+    public void setLocation(String location) {this.location = location;}
+    public void setCategory(String category) {this.category = category;}
+    public void setPromoted(boolean promoted) {isPromoted = promoted;}
+    public void setDateTime(Date dateTime) {this.dateTime = dateTime;}
     public String getDescription() { return description; }
     public String getLocation() { return location; }
     public Date getDateTime() { return dateTime; }
     public String getCategory() { return category; }
     public int getImageResId() { return imageResId; }
     public boolean isPromoted() { return isPromoted; }
-
     public int getCapacity() { return capacity; }
     public int getAttendingCount() { return attendingCount; }
     public double getAverageRating() { return averageRating; }

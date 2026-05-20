@@ -1,5 +1,6 @@
 package marija.sekulic.eventsapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -56,22 +57,18 @@ public class RatingActivity extends AppCompatActivity {
             if (event != null) {
                 // Kod baze podataka, proveru da li je korisnik već ocenio ovaj događaj
                 // radimo u posebnoj tabeli ili preko SharedPreferences, ali pošto tvoj objekat ima isRated():
-                if (event.isRated()) {
-                    Toast.makeText(this, "Već ste ocenili ovaj događaj", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
+                String currentUsername = sp.getString("current_user", "");
+                UserDAO userDAO = new UserDAO(RatingActivity.this);
+                int userId = userDAO.getUserIdByUsername(currentUsername);
 
-                // 4. Računamo novi prosek i broj ocena u Javi unutar samog objekta
-                event.addRating(currentRating);
-                event.setRated(true);
+                RatingDAO ratingDAO = new RatingDAO(RatingActivity.this);
+                boolean uspelo = ratingDAO.leaveRating(userId, eventId, currentRating);
 
-                // 5. Čuvamo te nove izračunate ocene nazad u bazu podataka!
-                boolean uspesnoOcenjeno = eventDAO.updateEventRating(event);
-
-                if (uspesnoOcenjeno) {
+                if (uspelo) {
                     Toast.makeText(this, "Hvala na oceni!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(this, "Greška pri čuvanju ocene u bazi.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Već ste ocenili ovaj događaj.", Toast.LENGTH_SHORT).show();
                 }
             }
 
