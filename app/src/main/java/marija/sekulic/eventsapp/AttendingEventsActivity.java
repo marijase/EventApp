@@ -41,7 +41,7 @@ public class AttendingEventsActivity extends AppCompatActivity {
 
         List<Event> upcoming = attendanceDAO.getAttendingEvents(userId);
 
-        // svi prošli eventi iz baze automatski idu u past sekciju (tvoj zahtev)
+        // svi prošli eventi iz baze automatski idu u past sekciju
         List<Event> sviEventi = eventDAO.getAllEvents();
         List<Event> past = new ArrayList<>();
         for (Event e : sviEventi) {

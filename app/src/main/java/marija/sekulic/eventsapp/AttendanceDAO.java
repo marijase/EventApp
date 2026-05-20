@@ -44,7 +44,6 @@ public class AttendanceDAO {
     public String setAttending(int userId, int eventId) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        // 1. Provera kapaciteta (iz PDF zahteve)
         Cursor eventCursor = db.rawQuery("SELECT promoted, kapacitet, brojPrisutnih FROM events WHERE id = ?",
                 new String[]{String.valueOf(eventId)});
 
@@ -61,7 +60,7 @@ public class AttendanceDAO {
         }
         eventCursor.close();
 
-        // 2. Provera postojećeg zapisa u attendance (Prelazak sa INTERESTED na ATTENDING)
+        // Provera postojećeg zapisa u attendance (Prelazak sa INTERESTED na ATTENDING)
         Cursor attCursor = db.rawQuery("SELECT prisustvo FROM attendance WHERE userId = ? AND eventId = ?",
                 new String[]{String.valueOf(userId), String.valueOf(eventId)});
 
@@ -75,7 +74,7 @@ public class AttendanceDAO {
                 db.close();
                 return "Već ste prijavljeni za ovaj događaj!";
             }
-            // Update postojećeg reda kako zahteva asistent ("postojeći zapis se updejtuje")
+            // Update postojećeg zapisa
             db.update("attendance", values, "userId = ? AND eventId = ?",
                     new String[]{String.valueOf(userId), String.valueOf(eventId)});
         } else {
@@ -86,7 +85,6 @@ public class AttendanceDAO {
         }
         attCursor.close();
 
-        // Ažuriranje broja prisutnih u tabeli events
         db.execSQL("UPDATE events SET brojPrisutnih = brojPrisutnih + 1 WHERE id = ?", new Object[]{eventId});
         db.close();
         return "Uspešno ste se prijavili!";

@@ -134,8 +134,13 @@ public class CreateEventActivity extends AppCompatActivity {
             newEvent = EventFactory.createRegularEvent(name, desc, loc, parsedDate, category, image);
         }
 
-        AppData.allEvents.add(newEvent);
-        Toast.makeText(this, "Događaj uspešno kreiran.", Toast.LENGTH_SHORT).show();
-        finish();
+        EventDAO eventDAO = new EventDAO(this);
+        boolean uspelo = eventDAO.createEvent(newEvent);
+        if (uspelo) {
+            Toast.makeText(this, "Događaj uspešno kreiran.", Toast.LENGTH_SHORT).show();
+            finish();
+        } else {
+            Toast.makeText(this, "Greška pri čuvanju događaja.", Toast.LENGTH_SHORT).show();
+        }
     }
 }

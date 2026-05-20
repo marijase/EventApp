@@ -52,7 +52,7 @@ public class PasswordActivity extends AppCompatActivity {
                 String user = sp.getString("current_user", "");
                 UserDAO userDAO = new UserDAO(PasswordActivity.this);
 
-                // 5. ISPRAVLJENO: Prosleđujemo tvog 'user'-a umesto 'loggedInUser'
+                // Prosleđujemo tvog 'user'-a umesto 'loggedInUser'
                 if (!userDAO.checkLogin(user, currentInput)) {
                     current_pass.setError("Trenutna lozinka nije tačna!");
                     current_pass.setText("");
@@ -61,11 +61,10 @@ public class PasswordActivity extends AppCompatActivity {
                     return;
                 }
 
-                // 6. Ako je stara lozinka uspešno proverena kroz bazu, upisujemo novu lozinku u bazu!
+                // Ako je stara lozinka uspešno proverena kroz bazu, upisujemo novu lozinku u bazu!
                 boolean uspesnoIzmenjeno = userDAO.updateUserPassword(user, newInput);
 
                 if (uspesnoIzmenjeno) {
-                    // Ažuriramo SharedPreferences čisto da se osiguramo ako ti zatreba negde u sesiji
                     SharedPreferences.Editor editor = sp.edit();
                     editor.putString("registered_password", newInput);
                     editor.putString("current_password", newInput);

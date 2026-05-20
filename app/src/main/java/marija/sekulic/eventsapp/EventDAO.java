@@ -70,7 +70,7 @@ public class EventDAO {
         return getEventsFromCursor("SELECT * FROM events WHERE kategorija = ? ORDER BY promoted DESC", new String[]{category});
     }
 
-    // Prolazak kroz Cursor iterator (Zahtev sa asistentove slike uz getColumnIndexOrThrow!)
+    // Prolazak kroz Cursor iterator
     private List<Event> getEventsFromCursor(String sql, String[] selectionArgs) {
         List<Event> list = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -152,22 +152,5 @@ public class EventDAO {
         if (cursor != null) cursor.close();
         db.close();
         return null;
-    }
-    // Metoda koja ažurira ocenu događaja u bazi nakon što ga korisnik oceni.
-
-    public boolean updateEventRating(Event event) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-
-        // Stavljamo nove vrednosti koje je objekat izračunao u metodi event.addRating()
-        values.put("average_rating", event.getAverageRating());
-        values.put("rating_count", event.getRatingCount());
-
-        // Radimo UPDATE u SQL-u školski preko spajanja stringova
-        int rowsAffected = db.update("events", values, "id = " + event.getId(), null);
-        db.close();
-
-        // Ako je promenjen tačno 1 red u bazi, uspeh je!
-        return rowsAffected > 0;
     }
 }

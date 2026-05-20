@@ -94,27 +94,22 @@ public class UserDAO {
         } else {
             cursor.close();
             db.close();
-            return "Not Available"; // Ako ne nadje ništa
+            return "Not Available";
         }
     }
-    /**
-     * Metoda koja hešira novu lozinku i upisuje je u bazu za određenog korisnika.
-     */
+    // Metoda koja hešira novu lozinku i upisuje je u bazu
     public boolean updateUserPassword(String username, String newPassword) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        // 1. Heširamo novu lozinku preko tvog nedirnutog PasswordHasher-a pre upisa u bazu
         String hashedNewPassword = PasswordHasher.hashPassword(newPassword);
         values.put("password", hashedNewPassword);
 
-        // 2. Menjamo red u tabeli users gde je username jednak ulogovanom korisniku
+        // Menjamo red u tabeli users gde je username jednak ulogovanom korisniku
         int rows = db.update("users", values, "username = '" + username + "'", null);
 
-        // 3. Zatvaramo bazu školski
         db.close();
 
-        // Vraća true ako je uspešno izmenjen bar jedan red u bazi (to znači da je uspeo update)
         return rows > 0;
     }
     public int getUserIdByUsername(String username) {

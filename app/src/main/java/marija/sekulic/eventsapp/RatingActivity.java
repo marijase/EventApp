@@ -48,10 +48,10 @@ public class RatingActivity extends AppCompatActivity {
                 return;
             }
 
-            // 2. Pravimo radnika za bazu podataka
+            // Pravimo radnika za bazu podataka
             EventDAO eventDAO = new EventDAO(RatingActivity.this);
 
-            // 3. Tražimo događaj iz baze preko ID-ja (onog što smo maločas sredili u EventDAO)
+            // Tražimo događaj iz baze preko ID-ja (onog u EventDAO)
             Event event = eventDAO.getEventById(eventId);
 
             if (event != null) {
