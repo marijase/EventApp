@@ -30,7 +30,7 @@ public class MyEventsFragment extends Fragment {
         btn_attending = view.findViewById(R.id.id_btn_attending);
         btn_myprofile = view.findViewById(R.id.id_btn_myprofile);
 
-        // klik interested
+
         btn_interested.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

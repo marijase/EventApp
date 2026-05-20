@@ -27,6 +27,9 @@ public class RatingActivity extends AppCompatActivity {
         stars[3] = findViewById(R.id.star4);
         stars[4] = findViewById(R.id.star5);
 
+        // Hvatamo i ID i Ime koje nam je adapter poslao
+        int eventId = getIntent().getIntExtra("EVENT_ID", -1);
+
         String eventName = getIntent().getStringExtra("EVENT_NAME");
         if (eventName != null) {
             txtEventName.setText(eventName);
@@ -38,18 +41,38 @@ public class RatingActivity extends AppCompatActivity {
         }
 
         btnConfirm.setOnClickListener(v -> {
+            // Provera da li je korisnik uopšte izabrao neku zvezdicu
+            if (currentRating == 0) {
+                Toast.makeText(this, "Molimo vas izaberite ocenu od 1 do 5!", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            Event event = AppData.findByName(eventName);
+            // 2. Pravimo radnika za bazu podataka
+            EventDAO eventDAO = new EventDAO(RatingActivity.this);
+
+            // 3. Tražimo događaj iz baze preko ID-ja (onog što smo maločas sredili u EventDAO)
+            Event event = eventDAO.getEventById(eventId);
 
             if (event != null) {
-
-                if (event.isRated()) { // DODATO
+                // Kod baze podataka, proveru da li je korisnik već ocenio ovaj događaj
+                // radimo u posebnoj tabeli ili preko SharedPreferences, ali pošto tvoj objekat ima isRated():
+                if (event.isRated()) {
                     Toast.makeText(this, "Već ste ocenili ovaj događaj", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
+                // 4. Računamo novi prosek i broj ocena u Javi unutar samog objekta
                 event.addRating(currentRating);
-                event.setRated(true); // DODATO
+                event.setRated(true);
+
+                // 5. Čuvamo te nove izračunate ocene nazad u bazu podataka!
+                boolean uspesnoOcenjeno = eventDAO.updateEventRating(event);
+
+                if (uspesnoOcenjeno) {
+                    Toast.makeText(this, "Hvala na oceni!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Greška pri čuvanju ocene u bazi.", Toast.LENGTH_SHORT).show();
+                }
             }
 
             finish();

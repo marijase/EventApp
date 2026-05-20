@@ -23,27 +23,24 @@ public class PasswordActivity extends AppCompatActivity {
         btn_save = findViewById(R.id.id_btn_save);
 
         btn_save.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
                 String currentInput = current_pass.getText().toString();
                 String newInput = new_password.getText().toString();
-
-                SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
-                String user = sp.getString("current_user", "");
-                String old_password = sp.getString("current_password", "");
 
                 if (currentInput.isEmpty() || newInput.isEmpty()) {
                     Toast.makeText(PasswordActivity.this, "Popunite sva polja!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if (!currentInput.equals(old_password)) {
-                    current_pass.setError("Trenutna lozinka nije tačna!");
-                    current_pass.setText("");
-                    new_password.setText("");
-                    current_pass.requestFocus();
-                    return;
-                }
+//                if (!currentInput.equals(old_password)) {
+//                    current_pass.setError("Trenutna lozinka nije tačna!");
+//                    current_pass.setText("");
+//                    new_password.setText("");
+//                    current_pass.requestFocus();
+//                    return;
+//                }
 
                 if (newInput.length() < 8) {
                     new_password.setError("Nova lozinka mora imati bar 8 karaktera!");
@@ -51,15 +48,34 @@ public class PasswordActivity extends AppCompatActivity {
                     return;
                 }
 
-                //  Snimanje nove lozinke
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putString("registered_password", newInput);
-                editor.putString("current_password", newInput);
-                editor.apply();
+                SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
+                String user = sp.getString("current_user", "");
+                UserDAO userDAO = new UserDAO(PasswordActivity.this);
 
-                Toast.makeText(PasswordActivity.this, "Lozinka uspešno izmenjena!", Toast.LENGTH_SHORT).show();
+                // 5. ISPRAVLJENO: Prosleđujemo tvog 'user'-a umesto 'loggedInUser'
+                if (!userDAO.checkLogin(user, currentInput)) {
+                    current_pass.setError("Trenutna lozinka nije tačna!");
+                    current_pass.setText("");
+                    new_password.setText("");
+                    current_pass.requestFocus();
+                    return;
+                }
 
-                finish();
+                // 6. Ako je stara lozinka uspešno proverena kroz bazu, upisujemo novu lozinku u bazu!
+                boolean uspesnoIzmenjeno = userDAO.updateUserPassword(user, newInput);
+
+                if (uspesnoIzmenjeno) {
+                    // Ažuriramo SharedPreferences čisto da se osiguramo ako ti zatreba negde u sesiji
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putString("registered_password", newInput);
+                    editor.putString("current_password", newInput);
+                    editor.apply();
+
+                    Toast.makeText(PasswordActivity.this, "Lozinka uspešno izmenjena!", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Toast.makeText(PasswordActivity.this, "Greška pri čuvanju lozinke u bazi.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

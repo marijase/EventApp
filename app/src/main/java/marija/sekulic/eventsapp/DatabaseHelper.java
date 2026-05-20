@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String db_name = "EventsApp.db";
-    private static final int db_version = 1;
+    private static final int db_version = 2;
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, db_name, null, db_version);
@@ -19,7 +19,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("create table users (id integer primary key autoincrement, " +
                 "                  username text unique not null, " +
                 "                   email   text unique not null, " +
-                "                   lozinka text not null )");          // hesirana lozinka
+                "                   password text not null )");          // hesirana lozinka
 
         db.execSQL("create table events (id integer primary key autoincrement, " +
                 "                       naziv text not null, " +

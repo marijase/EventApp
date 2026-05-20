@@ -111,4 +111,64 @@ public class EventDAO {
         db.close();
         return list;
     }
+    public Event getEventById(int id) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String upit = "SELECT * FROM events WHERE id = " + id;
+        Cursor cursor = db.rawQuery(upit, null);
+
+        if (cursor.moveToFirst()) {
+            String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            String desc = cursor.getString(cursor.getColumnIndexOrThrow("description"));
+            String loc = cursor.getString(cursor.getColumnIndexOrThrow("location"));
+            String cat = cursor.getString(cursor.getColumnIndexOrThrow("category"));
+            long dateMillis = cursor.getLong(cursor.getColumnIndexOrThrow("date_time"));
+            int img = cursor.getInt(cursor.getColumnIndexOrThrow("image_res_id"));
+            int isPromotedInt = cursor.getInt(cursor.getColumnIndexOrThrow("is_promoted"));
+            boolean isPromoted = (isPromotedInt == 1);
+            int capacity = cursor.getInt(cursor.getColumnIndexOrThrow("capacity"));
+            int attendingCount = cursor.getInt(cursor.getColumnIndexOrThrow("attending_count"));
+            double averageRating = cursor.getDouble(cursor.getColumnIndexOrThrow("average_rating"));
+            int ratingCount = cursor.getInt(cursor.getColumnIndexOrThrow("rating_count"));
+
+            cursor.close();
+            db.close();
+
+            Event e;
+
+            // Biramo koji konstruktor pozivamo
+            if (isPromoted) {
+                // Ako je promovisan, koristimo pun konstruktor sa svim parametrima
+                e = new Event(name, desc, loc, new Date(dateMillis), cat, img, true, capacity, attendingCount, averageRating, ratingCount);
+            } else {
+                // Ako je običan, koristimo tvoj kraći konstruktor
+                e = new Event(name, desc, loc, new Date(dateMillis), cat, img);
+            }
+
+            // 4. Na samom kraju mu obavezno lepimo ID koji smo prosledili metodi
+            e.setId(id);
+
+            return e; // Vraćamo kompletno napunjen objekat
+        }
+
+        if (cursor != null) cursor.close();
+        db.close();
+        return null;
+    }
+    // Metoda koja ažurira ocenu događaja u bazi nakon što ga korisnik oceni.
+
+    public boolean updateEventRating(Event event) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        // Stavljamo nove vrednosti koje je objekat izračunao u metodi event.addRating()
+        values.put("average_rating", event.getAverageRating());
+        values.put("rating_count", event.getRatingCount());
+
+        // Radimo UPDATE u SQL-u školski preko spajanja stringova
+        int rowsAffected = db.update("events", values, "id = " + event.getId(), null);
+        db.close();
+
+        // Ako je promenjen tačno 1 red u bazi, uspeh je!
+        return rowsAffected > 0;
+    }
 }

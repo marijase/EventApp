@@ -84,7 +84,6 @@ public class LoginActivity extends AppCompatActivity {
                     lgn_username.requestFocus();
 
                     Toast t = Toast.makeText(LoginActivity.this, "Username or password wrong! Try again.", Toast.LENGTH_SHORT);
-                    t.setGravity(Gravity.CENTER, 0, 0);
                     t.show();
                 }
 

@@ -95,7 +95,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         @SuppressLint("ResourceAsColor")
         public void bind(final Event event, final OnEventClickListener listener, boolean attendingMode) {
-            Toast.makeText(context, "attendingMode=" + attendingMode + " isPast=" + event.isPast(), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "attendingMode=" + attendingMode + " isPast=" + event.isPast(), Toast.LENGTH_SHORT).show();
             txtName.setText(event.getName());
 
             txtCategory.setText(event.getCategory());
@@ -131,6 +131,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
                 btnRate.setOnClickListener(v -> {
                     Intent intent = new Intent(context, RatingActivity.class);
+                    intent.putExtra("EVENT_ID", event.getId());
                     intent.putExtra("EVENT_NAME", event.getName());
                     context.startActivity(intent);
                 });

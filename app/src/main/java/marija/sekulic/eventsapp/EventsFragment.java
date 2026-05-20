@@ -17,8 +17,9 @@ import java.util.List;
 public class EventsFragment extends Fragment {
 
     private EventAdapter adapter;
-    private final List<Button> categoryButtons = new ArrayList<>();
+    private List<Button> categoryButtons = new ArrayList<>();
     // greska: categoryButtons may be final
+    private EventDAO eventDAO;
 
     public EventsFragment() {}
 
@@ -27,10 +28,13 @@ public class EventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view_events);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        // Inicijalizujemo listu dugmadi i radnika za bazu
+        categoryButtons = new ArrayList<>();
+        eventDAO = new EventDAO(getContext());
 
         adapter = new EventAdapter(event -> {
             Intent intent = new Intent(getActivity(), EventDetailsActivity.class);
-            intent.putExtra("EVENT_NAME", event.getName());
+            intent.putExtra("event_id", event.getId());
             startActivity(intent);
         });
         recyclerView.setAdapter(adapter);
@@ -74,12 +78,16 @@ public class EventsFragment extends Fragment {
     }
 
     private void updateList(String category) {
-        adapter.setEvents(AppData.getSortedEventsByCategory(category));
+        if (eventDAO != null) {
+            // Podatke povlačimo direktno iz SQLite baze podataka
+            List<Event> listaIzBaze = eventDAO.getEventsByCategory(category);
+            adapter.setEvents(listaIzBaze);
+        }
     }
 
     private void highlightActiveButton(Button activeBtn) {
         for (Button b : categoryButtons) {
-            b.setBackgroundTintList(null); // Reset
+            b.setBackgroundTintList(null); // Reset boje pozadine
             b.setTextColor(Color.BLACK);
         }
         // greska: method invocation getColorStateList may produce nullpointerexception

@@ -19,10 +19,13 @@ public class EventDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_details);
 
-        String eventName = getIntent().getStringExtra("EVENT_NAME");
-        Event event = AppData.findByName(eventName);
+        //String eventName = getIntent().getStringExtra("EVENT_NAME");
+        //Event event = AppData.findByName(eventName);
+        int eventId = getIntent().getIntExtra("EVENT_ID", -1);
+        EventDAO eventDAO = new EventDAO(this);
+        Event trenutniEvent = eventDAO.getEventById(eventId);
 
-        if (event == null) {
+        if (trenutniEvent == null) {
             finish();
             return;
         }
@@ -37,31 +40,31 @@ public class EventDetailsActivity extends AppCompatActivity {
         Button btnInterested = findViewById(R.id.btn_interested);
         Button btnAttending = findViewById(R.id.btn_attending);
 
-        imgEvent.setImageResource(event.getImageResId());
-        txtName.setText(event.getName());
-        txtDesc.setText(event.getDescription());
-        txtLoc.setText(event.getLocation());
-        if (event.getDateTime() != null) {
-            txtDate.setText(sdf.format(event.getDateTime()));
+        imgEvent.setImageResource(trenutniEvent.getImageResId());
+        txtName.setText(trenutniEvent.getName());
+        txtDesc.setText(trenutniEvent.getDescription());
+        txtLoc.setText(trenutniEvent.getLocation());
+        if (trenutniEvent.getDateTime() != null) {
+            txtDate.setText(sdf.format(trenutniEvent.getDateTime()));
         } else {
             txtDate.setText("Datum nije dostupan");
         }
 
-        if (event.isPromoted()) {
+        if (trenutniEvent.isPromoted()) {
             txtCapacity.setVisibility(View.VISIBLE);
-            txtCapacity.setText("Slobodnih mesta: " + (event.getCapacity() - event.getAttendingCount()) + "/" + event.getCapacity());
+            txtCapacity.setText("Slobodnih mesta: " + (trenutniEvent.getCapacity() - trenutniEvent.getAttendingCount()) + "/" + trenutniEvent.getCapacity());
         } else {
             txtCapacity.setVisibility(View.GONE);
         }
 
-        if (event.getRatingCount() == 0) {
+        if (trenutniEvent.getRatingCount() == 0) {
             txtRating.setText("Još uvek nema ocena");
         } else {
-            txtRating.setText(String.format("Prosečna ocena: %.1f (%d ocena)", event.getAverageRating(), event.getRatingCount()));
+            txtRating.setText(String.format("Prosečna ocena: %.1f (%d ocena)", trenutniEvent.getAverageRating(), trenutniEvent.getRatingCount()));
         }
 
         // blokada za prosle dogadjaje
-        if (event.isPast()) {
+        if (trenutniEvent.isPast()) {
 
             btnInterested.setOnClickListener(v ->
                     Toast.makeText(this, "Ovaj događaj je završen", Toast.LENGTH_SHORT).show()
@@ -74,15 +77,15 @@ public class EventDetailsActivity extends AppCompatActivity {
         } else {
 
             btnInterested.setOnClickListener(v -> {
-                if (!AppData.interestedEvents.contains(event)) {
-                    AppData.interestedEvents.add(event);
+                if (!AppData.interestedEvents.contains(trenutniEvent)) {
+                    AppData.interestedEvents.add(trenutniEvent);
                 }
                 Toast.makeText(this, "Dodat u zainteresovane.", Toast.LENGTH_SHORT).show();
             });
 
             btnAttending.setOnClickListener(v -> {
-                if (!AppData.attendingEvents.contains(event)) {
-                    AppData.attendingEvents.add(event);
+                if (!AppData.attendingEvents.contains(trenutniEvent)) {
+                    AppData.attendingEvents.add(trenutniEvent);
                 }
                 Toast.makeText(this, "Prijavili ste se na događaj.", Toast.LENGTH_SHORT).show();
             });
