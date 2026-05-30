@@ -1,64 +1,73 @@
 package marija.sekulic.eventsapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link FriendsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class FriendsFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private AttendanceRepository attendanceRepository;
+    private ArrayAdapter<String> listAdapter;
+    private List<String> items = new ArrayList<>();
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public FriendsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FriendsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FriendsFragment newInstance(String param1, String param2) {
-        FriendsFragment fragment = new FriendsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    public FriendsFragment() {}
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_friends, container, false);
+
+        ListView listView = view.findViewById(R.id.lv_friends_activity);
+        TextView txtEmpty = view.findViewById(R.id.txt_friends_empty);
+
+        attendanceRepository = new AttendanceRepository(getContext());
+
+        listAdapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_list_item_1, items);
+        listView.setAdapter(listAdapter);
+
+        SharedPreferences sp = requireActivity().getSharedPreferences("UserData", requireActivity().MODE_PRIVATE);
+        String serverUserId = sp.getString("current_server_id", "");
+
+        if (serverUserId.isEmpty()) {
+            txtEmpty.setVisibility(View.VISIBLE);
+            txtEmpty.setText("Friends su dostupni samo kada ste online.");
+            listView.setVisibility(View.GONE);
+            return view;
         }
-    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_friends, container, false);
+        attendanceRepository.getFriendsActivity(serverUserId, new RepositoryCallback<List<String>>() {
+            @Override
+            public void onResult(List<String> result) {
+                items.clear();
+                items.addAll(result);
+                listAdapter.notifyDataSetChanged();
+                if (result.isEmpty()) {
+                    txtEmpty.setVisibility(View.VISIBLE);
+                    listView.setVisibility(View.GONE);
+                } else {
+                    txtEmpty.setVisibility(View.GONE);
+                    listView.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                txtEmpty.setVisibility(View.VISIBLE);
+                txtEmpty.setText(errorMessage);
+                listView.setVisibility(View.GONE);
+            }
+        });
+
+        return view;
     }
 }

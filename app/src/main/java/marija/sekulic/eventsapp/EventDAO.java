@@ -23,6 +23,7 @@ public class EventDAO {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        values.put("mongo_id", event.getMongoId()); // IZMENA: Upisujemo mongo_id string
         values.put("naziv", event.getName());
         values.put("opis", event.getDescription());
         values.put("lokacija", event.getLocation());
@@ -79,6 +80,8 @@ public class EventDAO {
         if (cursor.moveToFirst()) {
             do {
                 // Koristimo fabričke metode za kreiranje objekata na osnovu baze
+                // IZMENA: Čitamo mongo_id iz baze
+                String mongoId = cursor.getString(cursor.getColumnIndexOrThrow("mongo_id"));
                 String name = cursor.getString(cursor.getColumnIndexOrThrow("naziv"));
                 String description = cursor.getString(cursor.getColumnIndexOrThrow("opis"));
                 String location = cursor.getString(cursor.getColumnIndexOrThrow("lokacija"));
@@ -117,6 +120,8 @@ public class EventDAO {
         Cursor cursor = db.rawQuery(upit, null);
 
         if (cursor.moveToFirst()) {
+            // IZMENA: Čitamo mongo_id iz baze
+            String mongoId = cursor.getString(cursor.getColumnIndexOrThrow("mongo_id"));
             String name = cursor.getString(cursor.getColumnIndexOrThrow("naziv"));
             String desc = cursor.getString(cursor.getColumnIndexOrThrow("opis"));
             String loc = cursor.getString(cursor.getColumnIndexOrThrow("lokacija"));
@@ -146,11 +151,24 @@ public class EventDAO {
                     EventFactory.getImageForCategory(cat), isPromoted, capacity,
                     attendingCount, averageRating, ratingCount);
             e.setId(id);
+            e.setMongoId(mongoId); // IZMENA: Dodeljujemo mongoId objektu
             return e;
         }
 
-        if (cursor != null) cursor.close();
+        cursor.close();
         db.close();
         return null;
+    }
+    public boolean updateEventRating(Event event) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put("prosecnaOcena", event.getAverageRating());
+        values.put("brojOcena", event.getRatingCount());
+
+        int rowsAffected = db.update("events", values, "id = " + event.getId(), null);
+        db.close();
+
+        return rowsAffected > 0;
     }
 }

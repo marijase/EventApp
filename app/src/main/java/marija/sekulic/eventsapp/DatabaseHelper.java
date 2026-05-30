@@ -17,6 +17,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table users (id integer primary key autoincrement, " +
+                "                       mongo_id text, " + // KJUČNA IZMENA: Kolona za MongoDB ID sa servera
                 "                  username text unique not null, " +
                 "                   email   text unique not null, " +
                 "                   password text not null )");          // hesirana lozinka

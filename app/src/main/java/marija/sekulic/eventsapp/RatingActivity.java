@@ -48,31 +48,32 @@ public class RatingActivity extends AppCompatActivity {
                 return;
             }
 
-            // Pravimo radnika za bazu podataka
-            EventDAO eventDAO = new EventDAO(RatingActivity.this);
+            SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
+            String serverUserId = sp.getString("current_server_id", "");
+            String currentUsername = sp.getString("current_user", "");
 
-            // Tražimo događaj iz baze preko ID-ja (onog u EventDAO)
-            Event event = eventDAO.getEventById(eventId);
+            UserDAO userDAO = new UserDAO(this);
+            int localUserId = userDAO.getUserIdByUsername(currentUsername);
 
-            if (event != null) {
-                // Kod baze podataka, proveru da li je korisnik već ocenio ovaj događaj
-                // radimo u posebnoj tabeli ili preko SharedPreferences, ali pošto tvoj objekat ima isRated():
-                SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
-                String currentUsername = sp.getString("current_user", "");
-                UserDAO userDAO = new UserDAO(RatingActivity.this);
-                int userId = userDAO.getUserIdByUsername(currentUsername);
+            String serverEventId = String.valueOf(eventId); // fallback
 
-                RatingDAO ratingDAO = new RatingDAO(RatingActivity.this);
-                boolean uspelo = ratingDAO.leaveRating(userId, eventId, currentRating);
+            RatingRepository ratingRepo = new RatingRepository(this);
+            btnConfirm.setEnabled(false);
 
-                if (uspelo) {
-                    Toast.makeText(this, "Hvala na oceni!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Već ste ocenili ovaj događaj.", Toast.LENGTH_SHORT).show();
-                }
-            }
+            ratingRepo.leaveRating(serverUserId, serverEventId, localUserId, eventId, currentRating,
+                    new RepositoryCallback<Boolean>() {
+                        @Override
+                        public void onResult(Boolean result) {
+                            Toast.makeText(RatingActivity.this, "Hvala na oceni!", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
 
-            finish();
+                        @Override
+                        public void onError(String errorMessage) {
+                            btnConfirm.setEnabled(true);
+                            Toast.makeText(RatingActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
     }
 

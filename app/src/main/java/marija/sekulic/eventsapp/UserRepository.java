@@ -78,7 +78,7 @@ public class UserRepository {
 
                 if (response == null) {
                     // OFFLINE - padamo na lokalnu bazu
-                    User localUser = Validation.findByUsername(username); // koristimo Validation klasu
+                    User localUser = userDAO.getUserByUsername(username);
                     boolean localOk = localUser != null &&
                             PasswordHasher.verifyPassword(password, localUser.password);
 

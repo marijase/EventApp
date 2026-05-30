@@ -69,39 +69,59 @@ public class HttpHelper {
         return responseCode == SUCCESS ? new JSONArray(jsonString) : null;
     }
 
-    public static JSONObject postJSONObjectFromURL(String urlString, JSONObject jsonObject) throws IOException, JSONException {
+    public static JSONObject postJSONObjectFromURL(String urlString, JSONObject jsonObject) {
         HttpURLConnection urlConnection = null;
-        URL url = new URL(urlString);
-        urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod("POST");
-        urlConnection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-        urlConnection.setRequestProperty("Accept", "application/json");
-        urlConnection.setDoOutput(true);
-        urlConnection.setDoInput(true);
         try {
-            urlConnection.connect();
-        } catch (IOException e) {
-            return null;
-        }
-        DataOutputStream os = new DataOutputStream(urlConnection.getOutputStream());
-        os.writeBytes(jsonObject.toString());
-        os.flush();
-        os.close();
-        int responseCode = urlConnection.getResponseCode();
-        Log.i("STATUS", String.valueOf(responseCode));
-        Log.i("MSG", urlConnection.getResponseMessage());
+            URL url = new URL(urlString);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+            urlConnection.setRequestProperty("Accept", "application/json");
+            urlConnection.setDoOutput(true);
+            urlConnection.setDoInput(true);
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line + "\n");
+            urlConnection.connect();
+
+            DataOutputStream os = new DataOutputStream(urlConnection.getOutputStream());
+            os.writeBytes(jsonObject.toString());
+            os.flush();
+            os.close();
+
+            int responseCode = urlConnection.getResponseCode();
+
+            // KLJUČNA PROMENA: Ako je greška (400, 401, 409...), Java zahteva getErrorStream()
+            BufferedReader br;
+            if (responseCode >= 200 && responseCode < 300) {
+                br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+            } else {
+                br = new BufferedReader(new InputStreamReader(urlConnection.getErrorStream()));
+            }
+
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            br.close();
+
+            String jsonString = sb.toString();
+            Log.d("HTTP POST", "Code: " + responseCode + " JSON: " + jsonString);
+
+            // Ubacujemo statusni kod u JSON kako bi tvoj Repository mogao da ga pročita!
+            JSONObject responseJson = new JSONObject(jsonString);
+            responseJson.put("_httpStatus", responseCode);
+
+            return responseJson;
+
+        } catch (Exception e) {
+            // Ako ovde upadne, znači da je server zaista ugašen ili nema interneta
+            Log.e("HTTP POST", "Pravi offline mod ili server ugasen: " + e.getMessage());
+            return null;
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
-        br.close();
-        String jsonString = sb.toString();
-        Log.d("HTTP POST", "JSON obj- " + jsonString);
-        urlConnection.disconnect();
-        return responseCode == SUCCESS ? new JSONObject(jsonString) : null;
     }
 
     public static JSONObject putJSONObjectFromURL(String urlString, JSONObject jsonObject) throws IOException, JSONException {

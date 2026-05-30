@@ -78,24 +78,51 @@ public class EventDetailsActivity extends AppCompatActivity {
         } else {
 
             SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
+            String serverUserId = sp.getString("current_server_id", "");
             String currentUsername = sp.getString("current_user", "");
+
             UserDAO userDAO = new UserDAO(this);
-            int userId = userDAO.getUserIdByUsername(currentUsername);
-            AttendanceDAO attendanceDAO = new AttendanceDAO(this);
+            int localUserId = userDAO.getUserIdByUsername(currentUsername);
 
-            btnInterested.setOnClickListener(v -> {
-                boolean uspelo = attendanceDAO.setInterested(userId, trenutniEvent.getId());
-                if (uspelo) {
-                    Toast.makeText(this, "Dodat u zainteresovane.", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Već ste zainteresovani za ovaj događaj.", Toast.LENGTH_SHORT).show();
-                }
-            });
+            // server event id - koristimo naziv kao privremeni identifikator
+            // idealno bi bio sacuvan server _id u lokalnoj bazi uz event
+            String serverEventId = trenutniEvent.getMongoId();
 
-            btnAttending.setOnClickListener(v -> {
-                String poruka = attendanceDAO.setAttending(userId, trenutniEvent.getId());
-                Toast.makeText(this, poruka, Toast.LENGTH_SHORT).show();
-            });
+            AttendanceRepository attendanceRepo = new AttendanceRepository(this);
+
+            btnInterested.setOnClickListener(v ->
+                    attendanceRepo.markAttendance(
+                            serverUserId, serverEventId,
+                            localUserId, trenutniEvent.getId(),
+                            "ZAINTERESOVAN",
+                            new RepositoryCallback<String>() {
+                                @Override
+                                public void onResult(String result) {
+                                    Toast.makeText(EventDetailsActivity.this, result, Toast.LENGTH_SHORT).show();
+                                }
+                                @Override
+                                public void onError(String errorMessage) {
+                                    Toast.makeText(EventDetailsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                                }
+                            })
+            );
+
+            btnAttending.setOnClickListener(v ->
+                    attendanceRepo.markAttendance(
+                            serverUserId, serverEventId,
+                            localUserId, trenutniEvent.getId(),
+                            "PRISUSTVUJE",
+                            new RepositoryCallback<String>() {
+                                @Override
+                                public void onResult(String result) {
+                                    Toast.makeText(EventDetailsActivity.this, result, Toast.LENGTH_SHORT).show();
+                                }
+                                @Override
+                                public void onError(String errorMessage) {
+                                    Toast.makeText(EventDetailsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                                }
+                            })
+            );
         }
     }
 }

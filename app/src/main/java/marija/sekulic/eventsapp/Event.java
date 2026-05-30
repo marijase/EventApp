@@ -15,7 +15,11 @@ public class Event {
     private List<Integer> ratings = new ArrayList<>();
     private boolean rated = false;
     private int id;   // Kada pređemo na rad sa bazom podataka, svaki događaj mora imati svoj jedinstveni id
+    private String mongoId; // Polje za MongoDB _id string
 
+    // Dodaj getter i setter za ovo polje
+    public String getMongoId() { return mongoId; }
+    public void setMongoId(String mongoId) { this.mongoId = mongoId; }
     // promoted
     public Event(String name, String description, String location, Date dateTime, String category,
                  int imageResId, boolean isPromoted, int capacity, int attendingCount,
