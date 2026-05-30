@@ -71,6 +71,7 @@
         android:layout_height="50dp"
         android:orientation="horizontal"
         >
+
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -91,8 +92,13 @@
             android:inputType="textPassword"
             >
         </EditText>
-    </LinearLayout>
 
+    </LinearLayout>
+    <TextView
+        android:id="@+id/id_rgs_password_strength"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"/>
     <Button
         android:id="@+id/id_rgs_btn"
         android:layout_width="120dp"

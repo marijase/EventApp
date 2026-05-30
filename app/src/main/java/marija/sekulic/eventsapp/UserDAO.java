@@ -126,4 +126,20 @@ public class UserDAO {
         db.close();
         return -1;
     }
+    public User getUserByUsername(String username) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM users WHERE username = ?",
+                new String[]{username});
+        if (cursor.moveToFirst()) {
+            String uname = cursor.getString(cursor.getColumnIndexOrThrow("username"));
+            String email = cursor.getString(cursor.getColumnIndexOrThrow("email"));
+            String password = cursor.getString(cursor.getColumnIndexOrThrow("password"));
+            cursor.close();
+            db.close();
+            return new User(uname, email, password);
+        }
+        cursor.close();
+        db.close();
+        return null;
+    }
 }
