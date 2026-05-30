@@ -15,7 +15,7 @@
 
     public class EventsActivity extends AppCompatActivity {
         TextView subtitle;
-        Button btn_events, btn_myevents;
+        Button btn_events, btn_myevents, btn_friends;
         private EventDAO eventDAO;
 
         @Override
@@ -61,6 +61,14 @@
                             .commit();
                 }
             });
+
+            btn_friends = findViewById(R.id.btn_friends);
+            btn_friends.setOnClickListener(v -> {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.id_kontejner_fragmenata, new FriendsFragment())
+                        .commit();
+            });
+
 
 
             subtitle = findViewById(R.id.id_events_activity_subtitle);

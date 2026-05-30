@@ -103,5 +103,10 @@
         android:layout_gravity="center_horizontal"
         >
     </Button>
+    <CheckBox
+        android:id="@+id/id_rgs_is_admin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Registruj me kao administratora"/>
 
 </LinearLayout>
