@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String db_name = "EventsApp.db";
-    private static final int db_version = 6; // PROMENJENO NA 3: Forsira kreiranje nove kolone na telefonu
+    private static final int db_version = 7; // PROMENJENO NA 3: Forsira kreiranje nove kolone na telefonu
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, db_name, null, db_version);

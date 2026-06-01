@@ -44,52 +44,24 @@ public class PasswordActivity extends AppCompatActivity {
                 String user = sp.getString("current_user", "");
                 String savedPassInSp = sp.getString("current_password", ""); // Fallback sa Logina
 
-                UserDAO userDAO = new UserDAO(PasswordActivity.this);
+                btn_save.setEnabled(false);
+                UserRepository userRepository = new UserRepository(PasswordActivity.this);
+                userRepository.changePassword(user, currentInput, newInput, new RepositoryCallback<Boolean>() {
+                    @Override
+                    public void onResult(Boolean result) {
+                        btn_save.setEnabled(true);
+                        Toast.makeText(PasswordActivity.this, "Lozinka uspešno izmenjena!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
 
-                // HIBRIDNA PROVERA TRENUTNE LOZINKE: Proveri lokalnu bazu ILI SharedPreferences fallback
-                boolean isCurrentPasswordCorrect = false;
-
-                if (userDAO.checkLogin(user, currentInput)) {
-                    isCurrentPasswordCorrect = true;
-                } else if (!savedPassInSp.isEmpty() && currentInput.equals(savedPassInSp)) {
-                    isCurrentPasswordCorrect = true;
-                }
-
-                if (!isCurrentPasswordCorrect) {
-                    current_pass.setError("Trenutna lozinka nije tačna!");
-                    current_pass.setText("");
-                    new_password.setText("");
-                    current_pass.requestFocus();
-                    return;
-                }
-
-                // OSIGURANJE KORISNIKA: Ako korisnik ne postoji lokalno u SQLite, ubacujemo ga pre izmene lozinke
-                int localUserId = userDAO.getUserIdByUsername(user);
-                if (localUserId <= 0) {
-                    DatabaseHelper dbHelper = new DatabaseHelper(PasswordActivity.this);
-                    SQLiteDatabase db = dbHelper.getWritableDatabase();
-                    ContentValues uValues = new ContentValues();
-                    uValues.put("username", user);
-                    uValues.put("email", user + "@gmail.com");
-                    uValues.put("password", "temp_hash_placeholder"); // Privremeni zapis
-                    db.insert("users", null, uValues);
-                    db.close();
-                }
-
-                // Sada sigurno imamo korisnika u bazi i tvoj UserDAO može uspešno da odradi update i hesiranje
-                boolean uspesnoIzmenjeno = userDAO.updateUserPassword(user, newInput);
-
-                if (uspesnoIzmenjeno) {
-                    SharedPreferences.Editor editor = sp.edit();
-                    editor.putString("registered_password", newInput);
-                    editor.putString("current_password", newInput); // Ažuriramo i fallback
-                    editor.apply();
-
-                    Toast.makeText(PasswordActivity.this, "Lozinka uspešno izmenjena!", Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
-                    Toast.makeText(PasswordActivity.this, "Greška pri čuvanju lozinke u bazi.", Toast.LENGTH_SHORT).show();
-                }
+                    @Override
+                    public void onError(String errorMessage) {
+                        btn_save.setEnabled(true);
+                        current_pass.setText("");
+                        new_password.setText("");
+                        Toast.makeText(PasswordActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }

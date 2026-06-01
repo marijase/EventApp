@@ -36,8 +36,12 @@
                     if (result.isEmpty()) {
                         for (Event e : AppData.allEvents) {
                             eventRepository.createEvent(e, new RepositoryCallback<Boolean>() {
-                                @Override public void onResult(Boolean r) {}
-                                @Override public void onError(String err) {}
+                                @Override public void onResult(Boolean r) {
+                                    android.util.Log.d("CREATE_EVENT", "Uspesno: " + e.getName());
+                                }
+                                @Override public void onError(String err) {
+                                    android.util.Log.e("CREATE_EVENT", "Greska za " + e.getName() + ": " + err);
+                                }
                             });
                         }
                     }
