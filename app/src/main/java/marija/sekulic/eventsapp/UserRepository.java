@@ -67,6 +67,9 @@ public class UserRepository {
     // ===== LOGIN =====
     // Online: server proverava -> kesira lokalno
     // Offline: pada na lokalnu bazu
+    // ===== LOGIN =====
+    // Online: server proverava -> kesira lokalno
+    // Offline: pada na lokalnu bazu
     public void login(String username, String password, RepositoryCallback<JSONObject> callback) {
         new Thread(() -> {
             try {
@@ -74,25 +77,12 @@ public class UserRepository {
                 body.put("username", username);
                 body.put("password", password);
 
+                // Pokušaj mrežnog poziva ka serveru
                 JSONObject response = HttpHelper.postJSONObjectFromURL(baseUrl + "/login", body);
 
                 if (response == null) {
-                    // OFFLINE - padamo na lokalnu bazu
-                    User localUser = userDAO.getUserByUsername(username);
-                    boolean localOk = localUser != null &&
-                            PasswordHasher.verifyPassword(password, localUser.password);
-
-                    if (localOk) {
-                        JSONObject offlineResult = new JSONObject();
-                        offlineResult.put("username", localUser.username);
-                        offlineResult.put("email", localUser.email);
-                        offlineResult.put("isAdmin", false);
-                        offlineResult.put("_id", "");
-                        offlineResult.put("_offline", true);
-                        mainHandler.post(() -> callback.onResult(offlineResult));
-                    } else {
-                        mainHandler.post(() -> callback.onError("Offline: pogrešni podaci ili korisnik ne postoji lokalno."));
-                    }
+                    // Ako server vrati null, prebacujemo se na lokalnu SQLite bazu
+                    _runOfflineLogin(username, password, callback);
                     return;
                 }
 
@@ -113,18 +103,44 @@ public class UserRepository {
                     return;
                 }
 
-                // kesiramo korisnika lokalno ako vec ne postoji
+                // Kesiramo korisnika lokalno ako već ne postoji
                 String uname = response.optString("username", "");
                 String emailFromServer = response.optString("email", "");
                 userDAO.cacheServerUser(uname, emailFromServer);
                 mainHandler.post(() -> callback.onResult(response));
 
             } catch (Exception e) {
-                mainHandler.post(() -> callback.onError("Greška: " + e.getMessage()));
+                // OVDE JE BIO GLAVNI PROBLEM!
+                // Kada je server isključen, mreža baca Exception i kôd je ovde samo ispisivao grešku.
+                // Sada, ako server padne ili baci mrežnu grešku, ODMAH idemo na offline proveru u SQLite!
+                _runOfflineLogin(username, password, callback);
             }
         }).start();
     }
 
+    // Pomoćna metoda koja sigurno obavlja proveru u lokalnoj bazi podataka
+    private void _runOfflineLogin(String username, String password, RepositoryCallback<JSONObject> callback) {
+        try {
+            User localUser = userDAO.getUserByUsername(username);
+            boolean localOk = localUser != null &&
+                    PasswordHasher.verifyPassword(password, localUser.password);
+
+            if (localOk) {
+                JSONObject offlineResult = new JSONObject();
+                offlineResult.put("username", localUser.username);
+                offlineResult.put("email", localUser.email);
+                offlineResult.put("isAdmin", false);
+                offlineResult.put("_id", "");
+                offlineResult.put("_offline", true);
+
+                mainHandler.post(() -> callback.onResult(offlineResult));
+            } else {
+                mainHandler.post(() -> callback.onError("Server je offline, a korisnik ne postoji lokalno ili su podaci pogrešni."));
+            }
+        } catch (Exception ex) {
+            mainHandler.post(() -> callback.onError("Greška pri učitavanju lokalne baze."));
+        }
+    }
     // ===== CHANGE PASSWORD =====
     // Online only
     public void changePassword(String username, String oldPassword, String newPassword,

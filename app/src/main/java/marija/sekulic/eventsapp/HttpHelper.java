@@ -80,6 +80,10 @@ public class HttpHelper {
             urlConnection.setDoOutput(true);
             urlConnection.setDoInput(true);
 
+            // DODATE LINIJE: Ako server ne odgovori za 3 sekunde, idemo na offline režim
+            urlConnection.setConnectTimeout(3000);
+            urlConnection.setReadTimeout(3000);
+
             urlConnection.connect();
 
             DataOutputStream os = new DataOutputStream(urlConnection.getOutputStream());
@@ -133,6 +137,10 @@ public class HttpHelper {
         urlConnection.setRequestProperty("Accept", "application/json");
         urlConnection.setDoOutput(true);
         urlConnection.setDoInput(true);
+
+        urlConnection.setConnectTimeout(3000);
+        urlConnection.setReadTimeout(3000);
+
         try {
             urlConnection.connect();
         } catch (IOException e) {
