@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String db_name = "EventsApp.db";
-    private static final int db_version = 2;
+    private static final int db_version = 6; // PROMENJENO NA 3: Forsira kreiranje nove kolone na telefonu
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, db_name, null, db_version);
@@ -17,12 +17,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table users (id integer primary key autoincrement, " +
-                "                       mongo_id text, " + // KJUČNA IZMENA: Kolona za MongoDB ID sa servera
                 "                  username text unique not null, " +
                 "                   email   text unique not null, " +
-                "                   password text not null )");          // hesirana lozinka
+                "                   password text not null )");
 
         db.execSQL("create table events (id integer primary key autoincrement, " +
+                "                       mongo_id text, " +
                 "                       naziv text not null, " +
                 "                       opis text, " +
                 "                    lokacija text not null, " +
@@ -33,9 +33,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "          brojPrisutnih INTEGER DEFAULT 0 CHECK (brojPrisutnih >= 0), " +
                 "             prosecnaOcena REAL DEFAULT 0 CHECK (prosecnaOcena BETWEEN 0 AND 5), " +
                 "              brojOcena INTEGER DEFAULT 0 CHECK (brojOcena >= 0), " +
-
-                // Ova dva pravila moraju ostati na kraju jer porede dve različite kolone
-
                 "       CHECK (promoted = 0 OR kapacitet > 0), " +
                 "       CHECK (promoted = 0 OR brojPrisutnih <= kapacitet));");
 
@@ -43,10 +40,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "   userId INTEGER NOT NULL, " +
                 "  eventId INTEGER NOT NULL, " +
                 "   prisustvo TEXT NOT NULL CHECK (prisustvo IN ('ZAINTERESOVAN', 'PRISUSTVUJE')), " +
-
- // Ova pravila se razlikuju od CHECK-a jer se bave povezivanjem tabela i sprečavanjem dupliranja, a ne proverom tačnosti
-
-                "   FOREIGN KEY(userId) REFERENCES users(id), " +   // služi kao "pokazivac" ka primary key (id)
+                "   FOREIGN KEY(userId) REFERENCES users(id), " +
                 "   FOREIGN KEY(eventId) REFERENCES events(id), " +
                 "   UNIQUE(userId, eventId));");
 
@@ -58,7 +52,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(userId) REFERENCES users(id), " +
                 "FOREIGN KEY(eventId) REFERENCES events(id), " +
                 "UNIQUE(userId, eventId));");
-
     }
 
     @Override
@@ -75,5 +68,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super.onConfigure(db);
         db.setForeignKeyConstraintsEnabled(true);
     }
-
 }

@@ -76,19 +76,23 @@ public class RegisterActivity extends AppCompatActivity {
 //                editor.putString("registered_email", email);
 //                editor.apply(); // cuva sve odjednom
 
-                UserDAO userDAO = new UserDAO(RegisterActivity.this);
-                boolean uspesnoReg = userDAO.registerUser(username, email, password);
+                rgs_btn.setEnabled(false);
+                userRepository.register(username, email, password, isAdmin, new RepositoryCallback<Boolean>() {
+                    @Override
+                    public void onResult(Boolean result) {
+                        rgs_btn.setEnabled(true);
+                        Toast.makeText(RegisterActivity.this, "Registracija uspešna!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
 
-                if (uspesnoReg) {
-                    Toast.makeText(RegisterActivity.this, "Registracija uspešna!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(RegisterActivity.this, "Korisničko ime ili email već postoje!", Toast.LENGTH_SHORT).show();
-                }
-
-                // Prelazak na Login umesto na Events
-                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish(); // ne dozvoljava Back dugme da vrati unazad
+                    @Override
+                    public void onError(String errorMessage) {
+                        rgs_btn.setEnabled(true);
+                        Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
         rgs_username.addTextChangedListener(new TextWatcher() {

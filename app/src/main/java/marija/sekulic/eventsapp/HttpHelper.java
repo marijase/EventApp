@@ -83,7 +83,7 @@ public class HttpHelper {
             urlConnection.connect();
 
             DataOutputStream os = new DataOutputStream(urlConnection.getOutputStream());
-            os.writeBytes(jsonObject.toString());
+            os.write(jsonObject.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
             os.flush();
             os.close();
 
@@ -139,23 +139,30 @@ public class HttpHelper {
             return null;
         }
         DataOutputStream os = new DataOutputStream(urlConnection.getOutputStream());
-        os.writeBytes(jsonObject.toString());
+        os.write(jsonObject.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
         os.flush();
         os.close();
         int responseCode = urlConnection.getResponseCode();
         Log.i("STATUS", String.valueOf(responseCode));
         Log.i("MSG", urlConnection.getResponseMessage());
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+        BufferedReader br;
+        if (responseCode >= 200 && responseCode < 300) {
+            br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+        } else {
+            br = new BufferedReader(new InputStreamReader(urlConnection.getErrorStream()));
+        }
         StringBuilder sb = new StringBuilder();
         String line;
         while ((line = br.readLine()) != null) {
-            sb.append(line + "\n");
+            sb.append(line).append("\n");
         }
         br.close();
         String jsonString = sb.toString();
         Log.d("HTTP PUT", "JSON obj- " + jsonString);
+        JSONObject responseJson = new JSONObject(jsonString);
+        responseJson.put("_httpStatus", responseCode);
         urlConnection.disconnect();
-        return responseCode == SUCCESS ? new JSONObject(jsonString) : null;
+        return responseJson;
     }
 }

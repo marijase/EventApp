@@ -21,6 +21,16 @@ public class EventDAO {
     // Unos jednog događaja uz prebacivanje Date objekta u TEXT String za SQLite
     public boolean createEvent(Event event) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+        // proveravamo da li event vec postoji po nazivu i datumu
+        Cursor check = db.rawQuery("SELECT id FROM events WHERE naziv = ? AND datumVreme = ?",
+                new String[]{event.getName(), event.getDateTime() != null ? sdf.format(event.getDateTime()) : ""});
+        if (check.getCount() > 0) {
+            check.close();
+            db.close();
+            return false; // vec postoji, preskacemo
+        }
+        check.close();
+
         ContentValues values = new ContentValues();
 
         values.put("mongo_id", event.getMongoId()); // IZMENA: Upisujemo mongo_id string

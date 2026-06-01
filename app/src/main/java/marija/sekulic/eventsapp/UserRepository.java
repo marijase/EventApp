@@ -83,11 +83,10 @@ public class UserRepository {
                             PasswordHasher.verifyPassword(password, localUser.password);
 
                     if (localOk) {
-                        // pravimo lazni JSON objekat sa lokalnim podacima za offline
                         JSONObject offlineResult = new JSONObject();
                         offlineResult.put("username", localUser.username);
                         offlineResult.put("email", localUser.email);
-                        offlineResult.put("isAdmin", false); // offline ne znamo, default false
+                        offlineResult.put("isAdmin", false);
                         offlineResult.put("_id", "");
                         offlineResult.put("_offline", true);
                         mainHandler.post(() -> callback.onResult(offlineResult));
@@ -100,7 +99,12 @@ public class UserRepository {
                 int status = response.optInt("_httpStatus", 0);
 
                 if (status == 401) {
-                    mainHandler.post(() -> callback.onError("Pogrešno korisničko ime ili lozinka."));
+                    String[] credentials = userDAO.getUserCredentials(username);
+                    if (credentials == null) {
+                        mainHandler.post(() -> callback.onError("Korisnik nije registrovan."));
+                    } else {
+                        mainHandler.post(() -> callback.onError("Neispravna lozinka."));
+                    }
                     return;
                 }
 
@@ -109,7 +113,10 @@ public class UserRepository {
                     return;
                 }
 
-                // uspesno online - vracamo ceo response (sadrzi _id, username, email, isAdmin)
+                // kesiramo korisnika lokalno ako vec ne postoji
+                String uname = response.optString("username", "");
+                String emailFromServer = response.optString("email", "");
+                userDAO.cacheServerUser(uname, emailFromServer);
                 mainHandler.post(() -> callback.onResult(response));
 
             } catch (Exception e) {

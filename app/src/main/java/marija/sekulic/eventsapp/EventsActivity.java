@@ -29,7 +29,28 @@
             eventDAO = new EventDAO(this);
 
             // Puni bazu sirovim podacima iz AppData ako je prazna (samo prvi put)
-            eventDAO.populateIfEmpty(AppData.allEvents);
+            EventRepository eventRepository = new EventRepository(this);
+            eventRepository.getAllEvents(new RepositoryCallback<java.util.List<Event>>() {
+                @Override
+                public void onResult(java.util.List<Event> result) {
+                    if (result.isEmpty()) {
+                        for (Event e : AppData.allEvents) {
+                            eventRepository.createEvent(e, new RepositoryCallback<Boolean>() {
+                                @Override public void onResult(Boolean r) {}
+                                @Override public void onError(String err) {}
+                            });
+                        }
+                    }
+                    // osvezi fragment nakon sto su eventi kesirani
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.id_kontejner_fragmenata, new EventsFragment())
+                            .commit();
+                }
+                @Override
+                public void onError(String errorMessage) {
+                    eventDAO.populateIfEmpty(AppData.allEvents);
+                }
+            });
 
 
             // " Podrazumevano se pri pokretanju prikazuje EventsFragment" :

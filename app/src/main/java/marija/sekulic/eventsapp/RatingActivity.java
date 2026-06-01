@@ -1,6 +1,8 @@
 package marija.sekulic.eventsapp;
 
+import android.content.ContentValues;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -28,9 +30,7 @@ public class RatingActivity extends AppCompatActivity {
         stars[3] = findViewById(R.id.star4);
         stars[4] = findViewById(R.id.star5);
 
-        // Hvatamo i ID i Ime koje nam je adapter poslao
         int eventId = getIntent().getIntExtra("EVENT_ID", -1);
-
         String eventName = getIntent().getStringExtra("EVENT_NAME");
         if (eventName != null) {
             txtEventName.setText(eventName);
@@ -42,7 +42,6 @@ public class RatingActivity extends AppCompatActivity {
         }
 
         btnConfirm.setOnClickListener(v -> {
-            // Provera da li je korisnik uopšte izabrao neku zvezdicu
             if (currentRating == 0) {
                 Toast.makeText(this, "Molimo vas izaberite ocenu od 1 do 5!", Toast.LENGTH_SHORT).show();
                 return;
@@ -55,12 +54,28 @@ public class RatingActivity extends AppCompatActivity {
             UserDAO userDAO = new UserDAO(this);
             int localUserId = userDAO.getUserIdByUsername(currentUsername);
 
-            String serverEventId = String.valueOf(eventId); // fallback
+            // Osiguranje da korisnik postoji lokalno zbog stranih ključeva
+            if (localUserId <= 0) {
+                SQLiteDatabase db = new DatabaseHelper(this).getWritableDatabase();
+                ContentValues uValues = new ContentValues();
+                uValues.put("username", currentUsername);
+                uValues.put("email", currentUsername + "@gmail.com");
+                uValues.put("password", "placeholder_pass");
+                long newId = db.insert("users", null, uValues);
+                db.close();
+                localUserId = (int) newId;
+            }
+
+            // REŠENJE ZA SERVER ID OCENE: Uzimamo pravi MongoDB ID iz lokalne baze podataka
+            EventDAO eventDAO = new EventDAO(this);
+            Event trenutniEvent = eventDAO.getEventById(eventId);
+            String serverEventId = (trenutniEvent != null) ? trenutniEvent.getMongoId() : String.valueOf(eventId);
 
             RatingRepository ratingRepo = new RatingRepository(this);
             btnConfirm.setEnabled(false);
 
-            ratingRepo.leaveRating(serverUserId, serverEventId, localUserId, eventId, currentRating,
+            int finalLocalUserId = localUserId;
+            ratingRepo.leaveRating(serverUserId, serverEventId, finalLocalUserId, eventId, currentRating,
                     new RepositoryCallback<Boolean>() {
                         @Override
                         public void onResult(Boolean result) {
@@ -81,9 +96,9 @@ public class RatingActivity extends AppCompatActivity {
         currentRating = rating;
         for (int i = 0; i < stars.length; i++) {
             if (i < rating) {
-                stars[i].setImageResource(android.R.drawable.btn_star_big_on); // Žuta zvezda
+                stars[i].setImageResource(android.R.drawable.btn_star_big_on);
             } else {
-                stars[i].setImageResource(android.R.drawable.btn_star_big_off); // Siva zvezda
+                stars[i].setImageResource(android.R.drawable.btn_star_big_off);
             }
         }
     }

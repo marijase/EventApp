@@ -1,6 +1,9 @@
 package marija.sekulic.eventsapp;
 
+import android.content.ContentValues;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -20,8 +23,6 @@ public class EventDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_details);
 
-        //String eventName = getIntent().getStringExtra("EVENT_NAME");
-        //Event event = AppData.findByName(eventName);
         int eventId = getIntent().getIntExtra("EVENT_ID", -1);
         EventDAO eventDAO = new EventDAO(this);
         Event trenutniEvent = eventDAO.getEventById(eventId);
@@ -40,6 +41,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         TextView txtRating = findViewById(R.id.txt_details_rating);
         Button btnInterested = findViewById(R.id.btn_interested);
         Button btnAttending = findViewById(R.id.btn_attending);
+        Button btnRate = findViewById(R.id.btn_confirm_rating); // Pretpostavljam da imaš dugme za ocenu ovde
 
         imgEvent.setImageResource(trenutniEvent.getImageResId());
         txtName.setText(trenutniEvent.getName());
@@ -64,19 +66,20 @@ public class EventDetailsActivity extends AppCompatActivity {
             txtRating.setText(String.format("Prosečna ocena: %.1f (%d ocena)", trenutniEvent.getAverageRating(), trenutniEvent.getRatingCount()));
         }
 
-        // blokada za prosle dogadjaje
+        // Blokada za prošle događaje
         if (trenutniEvent.isPast()) {
+            btnInterested.setOnClickListener(v -> Toast.makeText(this, "Ovaj događaj je završen", Toast.LENGTH_SHORT).show());
+            btnAttending.setOnClickListener(v -> Toast.makeText(this, "Ovaj događaj je završen", Toast.LENGTH_SHORT).show());
 
-            btnInterested.setOnClickListener(v ->
-                    Toast.makeText(this, "Ovaj događaj je završen", Toast.LENGTH_SHORT).show()
-            );
-
-            btnAttending.setOnClickListener(v ->
-                    Toast.makeText(this, "Ovaj događaj je završen", Toast.LENGTH_SHORT).show()
-            );
-
+            if (btnRate != null) {
+                btnRate.setOnClickListener(v -> {
+                    Intent intent = new Intent(this, RatingActivity.class);
+                    intent.putExtra("EVENT_ID", trenutniEvent.getId());
+                    intent.putExtra("EVENT_NAME", trenutniEvent.getName());
+                    startActivity(intent);
+                });
+            }
         } else {
-
             SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
             String serverUserId = sp.getString("current_server_id", "");
             String currentUsername = sp.getString("current_user", "");
@@ -84,8 +87,19 @@ public class EventDetailsActivity extends AppCompatActivity {
             UserDAO userDAO = new UserDAO(this);
             int localUserId = userDAO.getUserIdByUsername(currentUsername);
 
-            // server event id - koristimo naziv kao privremeni identifikator
-            // idealno bi bio sacuvan server _id u lokalnoj bazi uz event
+            // OSIGURANJE KORISNIKA: Ako korisnik ne postoji u SQLite (jer je logovan preko servera), kreiraj ga odmah!
+            if (localUserId <= 0) {
+                SQLiteDatabase db = new DatabaseHelper(this).getWritableDatabase();
+                ContentValues uValues = new ContentValues();
+                uValues.put("username", currentUsername);
+                uValues.put("email", currentUsername + "@gmail.com");
+                uValues.put("password", "placeholder_pass");
+                long newId = db.insert("users", null, uValues);
+                db.close();
+                localUserId = (int) newId;
+            }
+
+            final int finalLocalUserId = localUserId;
             String serverEventId = trenutniEvent.getMongoId();
 
             AttendanceRepository attendanceRepo = new AttendanceRepository(this);
@@ -93,7 +107,7 @@ public class EventDetailsActivity extends AppCompatActivity {
             btnInterested.setOnClickListener(v ->
                     attendanceRepo.markAttendance(
                             serverUserId, serverEventId,
-                            localUserId, trenutniEvent.getId(),
+                            finalLocalUserId, trenutniEvent.getId(),
                             "ZAINTERESOVAN",
                             new RepositoryCallback<String>() {
                                 @Override
@@ -110,7 +124,7 @@ public class EventDetailsActivity extends AppCompatActivity {
             btnAttending.setOnClickListener(v ->
                     attendanceRepo.markAttendance(
                             serverUserId, serverEventId,
-                            localUserId, trenutniEvent.getId(),
+                            finalLocalUserId, trenutniEvent.getId(),
                             "PRISUSTVUJE",
                             new RepositoryCallback<String>() {
                                 @Override

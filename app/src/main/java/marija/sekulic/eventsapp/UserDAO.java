@@ -142,4 +142,37 @@ public class UserDAO {
         db.close();
         return null;
     }
+    public void cacheServerUser(String username, String email) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        // proveravamo da li vec postoji
+        Cursor cursor = db.rawQuery("SELECT id FROM users WHERE username = ?",
+                new String[]{username});
+        if (cursor.getCount() > 0) {
+            cursor.close();
+            db.close();
+            return; // vec postoji, nista ne radimo
+        }
+        cursor.close();
+        ContentValues values = new ContentValues();
+        values.put("username", username);
+        values.put("email", email);
+        values.put("password", ""); // nema lokalne lozinke - korisnik je sa servera
+        db.insert("users", null, values);
+        db.close();
+    }
+    public String[] getUserCredentials(String username) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT email, password FROM users WHERE username = ?",
+                new String[]{username});
+        if (cursor.moveToFirst()) {
+            String email = cursor.getString(0);
+            String password = cursor.getString(1);
+            cursor.close();
+            db.close();
+            return new String[]{email, password};
+        }
+        cursor.close();
+        db.close();
+        return null;
+    }
 }

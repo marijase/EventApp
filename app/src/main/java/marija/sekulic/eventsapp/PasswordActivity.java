@@ -1,12 +1,13 @@
 package marija.sekulic.eventsapp;
 
+import android.content.ContentValues;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 public class PasswordActivity extends AppCompatActivity {
@@ -23,7 +24,6 @@ public class PasswordActivity extends AppCompatActivity {
         btn_save = findViewById(R.id.id_btn_save);
 
         btn_save.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 String currentInput = current_pass.getText().toString();
@@ -34,14 +34,6 @@ public class PasswordActivity extends AppCompatActivity {
                     return;
                 }
 
-//                if (!currentInput.equals(old_password)) {
-//                    current_pass.setError("Trenutna lozinka nije tačna!");
-//                    current_pass.setText("");
-//                    new_password.setText("");
-//                    current_pass.requestFocus();
-//                    return;
-//                }
-
                 if (newInput.length() < 8) {
                     new_password.setError("Nova lozinka mora imati bar 8 karaktera!");
                     new_password.setText("");
@@ -50,10 +42,20 @@ public class PasswordActivity extends AppCompatActivity {
 
                 SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
                 String user = sp.getString("current_user", "");
+                String savedPassInSp = sp.getString("current_password", ""); // Fallback sa Logina
+
                 UserDAO userDAO = new UserDAO(PasswordActivity.this);
 
-                // Prosleđujemo tvog 'user'-a umesto 'loggedInUser'
-                if (!userDAO.checkLogin(user, currentInput)) {
+                // HIBRIDNA PROVERA TRENUTNE LOZINKE: Proveri lokalnu bazu ILI SharedPreferences fallback
+                boolean isCurrentPasswordCorrect = false;
+
+                if (userDAO.checkLogin(user, currentInput)) {
+                    isCurrentPasswordCorrect = true;
+                } else if (!savedPassInSp.isEmpty() && currentInput.equals(savedPassInSp)) {
+                    isCurrentPasswordCorrect = true;
+                }
+
+                if (!isCurrentPasswordCorrect) {
                     current_pass.setError("Trenutna lozinka nije tačna!");
                     current_pass.setText("");
                     new_password.setText("");
@@ -61,13 +63,26 @@ public class PasswordActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Ako je stara lozinka uspešno proverena kroz bazu, upisujemo novu lozinku u bazu!
+                // OSIGURANJE KORISNIKA: Ako korisnik ne postoji lokalno u SQLite, ubacujemo ga pre izmene lozinke
+                int localUserId = userDAO.getUserIdByUsername(user);
+                if (localUserId <= 0) {
+                    DatabaseHelper dbHelper = new DatabaseHelper(PasswordActivity.this);
+                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+                    ContentValues uValues = new ContentValues();
+                    uValues.put("username", user);
+                    uValues.put("email", user + "@gmail.com");
+                    uValues.put("password", "temp_hash_placeholder"); // Privremeni zapis
+                    db.insert("users", null, uValues);
+                    db.close();
+                }
+
+                // Sada sigurno imamo korisnika u bazi i tvoj UserDAO može uspešno da odradi update i hesiranje
                 boolean uspesnoIzmenjeno = userDAO.updateUserPassword(user, newInput);
 
                 if (uspesnoIzmenjeno) {
                     SharedPreferences.Editor editor = sp.edit();
                     editor.putString("registered_password", newInput);
-                    editor.putString("current_password", newInput);
+                    editor.putString("current_password", newInput); // Ažuriramo i fallback
                     editor.apply();
 
                     Toast.makeText(PasswordActivity.this, "Lozinka uspešno izmenjena!", Toast.LENGTH_SHORT).show();

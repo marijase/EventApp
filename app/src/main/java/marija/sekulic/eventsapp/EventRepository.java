@@ -1,6 +1,8 @@
 package marija.sekulic.eventsapp;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Looper;
 import org.json.JSONArray;
@@ -15,12 +17,13 @@ public class EventRepository {
 
     private final EventDAO eventDAO;
     private final String baseUrl;
+    private final Context context; // Dodato za direktan pristup bazi tokom sinhronizacije
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
 
     public EventRepository(Context context) {
+        this.context = context;
         this.eventDAO = new EventDAO(context);
-        // SADA PONOVO KORISTIMO TVOJ SERVERCONFIG 🎉
         this.baseUrl = ServerConfig.BASE_URL;
     }
 
@@ -28,35 +31,35 @@ public class EventRepository {
     public void getAllEvents(RepositoryCallback<List<Event>> callback) {
         new Thread(() -> {
             try {
-                // 1. Pokušavamo ONLINE dobavljanje sa servera
-                JSONArray response = HttpHelper.getJSONArrayFromURL(baseUrl + "/events");
-
-                if (response == null) {
-                    // Ako server vrati null, preusmeri na lokalni DAO (OFFLINE)
-                    List<Event> localEvents = eventDAO.getAllEvents();
-                    mainHandler.post(() -> callback.onResult(localEvents));
+                JSONArray response = null;
+                try {
+                    response = HttpHelper.getJSONArrayFromURL(baseUrl + "/events");
+                } catch (Exception netEx) {
+                    loadLocalEventsAndPost(callback);
                     return;
                 }
 
-                List<Event> events = parseEvents(response);
-
-                // === PAMETNA IZMENA ===
-                // Ako je server uspešno odgovorio, ali je njegova MongoDB baza prazna ([]),
-                // prikaži naših 18 podrazumevanih događaja iz lokalne SQLite baze da ekran ne bude prazan.
-                if (events.isEmpty()) {
-                    events = eventDAO.getAllEvents();
+                if (response == null) {
+                    loadLocalEventsAndPost(callback);
+                    return;
                 }
 
-                List<Event> finalEvents = events;
-                mainHandler.post(() -> callback.onResult(finalEvents));
+                // 1. Sinhronizujemo podatke sa servera u lokalnu bazu (pametni upis bez dupliranja)
+                try {
+                    syncEventsFromServer(response);
+                } catch (Exception syncEx) {
+                    syncEx.printStackTrace();
+                }
+
+                // 2. Učitavamo podatke IZ LOKALNE BAZE na ekran da bi dobili prave SQLite ID-eve
+                loadLocalEventsAndPost(callback);
 
             } catch (Exception e) {
-                // 2. Ako nema konekcije, automatski čita iz SQLite baze
-                List<Event> localEvents = eventDAO.getAllEvents();
-                mainHandler.post(() -> callback.onResult(localEvents));
+                loadLocalEventsAndPost(callback);
             }
         }).start();
     }
+
     // ===== GET EVENTS BY CATEGORY =====
     public void getEventsByCategory(String category, RepositoryCallback<List<Event>> callback) {
         new Thread(() -> {
@@ -66,24 +69,49 @@ public class EventRepository {
             }
 
             try {
-                JSONArray response = HttpHelper.getJSONArrayFromURL(baseUrl + "/events/" + category);
-
-                if (response == null) {
-                    List<Event> localEvents = eventDAO.getEventsByCategory(category);
-                    mainHandler.post(() -> callback.onResult(localEvents));
+                JSONArray response = null;
+                try {
+                    response = HttpHelper.getJSONArrayFromURL(baseUrl + "/events/" + category);
+                } catch (Exception netEx) {
+                    loadLocalEventsByCategoryAndPost(category, callback);
                     return;
                 }
 
-                syncEventsFromServer(response);
+                if (response == null) {
+                    loadLocalEventsByCategoryAndPost(category, callback);
+                    return;
+                }
 
-                List<Event> events = eventDAO.getEventsByCategory(category);
-                mainHandler.post(() -> callback.onResult(events));
+                try {
+                    syncEventsFromServer(response);
+                } catch (Exception syncEx) {
+                    syncEx.printStackTrace();
+                }
+
+                loadLocalEventsByCategoryAndPost(category, callback);
 
             } catch (Exception e) {
-                List<Event> localEvents = eventDAO.getEventsByCategory(category);
-                mainHandler.post(() -> callback.onResult(localEvents));
+                loadLocalEventsByCategoryAndPost(category, callback);
             }
         }).start();
+    }
+
+    private void loadLocalEventsAndPost(RepositoryCallback<List<Event>> callback) {
+        try {
+            List<Event> localEvents = eventDAO.getAllEvents();
+            mainHandler.post(() -> callback.onResult(localEvents));
+        } catch (Exception e) {
+            mainHandler.post(() -> callback.onResult(new ArrayList<>()));
+        }
+    }
+
+    private void loadLocalEventsByCategoryAndPost(String category, RepositoryCallback<List<Event>> callback) {
+        try {
+            List<Event> localEvents = eventDAO.getEventsByCategory(category);
+            mainHandler.post(() -> callback.onResult(localEvents));
+        } catch (Exception e) {
+            mainHandler.post(() -> callback.onResult(new ArrayList<>()));
+        }
     }
 
     // ===== CREATE EVENT =====
@@ -114,9 +142,9 @@ public class EventRepository {
 
                 Event toSave = parseEventFromJSON(response);
                 if (toSave != null) {
-                    eventDAO.createEvent(toSave);
+                    try { eventDAO.createEvent(toSave); } catch (Exception ignored) {}
                 } else {
-                    eventDAO.createEvent(event);
+                    try { eventDAO.createEvent(event); } catch (Exception ignored) {}
                 }
 
                 mainHandler.post(() -> callback.onResult(true));
@@ -126,8 +154,6 @@ public class EventRepository {
             }
         }).start();
     }
-
-    // ===== POMOCNE METODE =====
 
     private List<Event> parseEvents(JSONArray array) {
         List<Event> list = new ArrayList<>();
@@ -145,23 +171,44 @@ public class EventRepository {
         return list;
     }
 
+    // PAMETNA SINHRONIZACIJA: Sprečava duplikate i ažurira ocene/prisustvo sa servera u SQLite
     private void syncEventsFromServer(JSONArray array) {
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
         try {
+            DatabaseHelper dbHelper = new DatabaseHelper(context);
+            db = dbHelper.getWritableDatabase();
+
             for (int i = 0; i < array.length(); i++) {
                 JSONObject obj = array.getJSONObject(i);
                 Event e = parseEventFromJSON(obj);
                 if (e != null) {
-                    eventDAO.createEvent(e);
+                    cursor = db.rawQuery("SELECT id FROM events WHERE mongo_id = ?", new String[]{e.getMongoId()});
+                    if (cursor.getCount() == 0) {
+                        // Ako ne postoji u SQLite, kreiraj ga preko DAO
+                        eventDAO.createEvent(e);
+                    } else {
+                        // Ako već postoji, ažuriraj dinamičke podatke (prisustvo i ocene) sa servera
+                        if (cursor.moveToFirst()) {
+                            int localId = cursor.getInt(0);
+                            db.execSQL("UPDATE events SET brojPrisutnih = ?, prosecnaOcena = ?, brojOcena = ? WHERE id = ?",
+                                    new Object[]{e.getAttendingCount(), e.getAverageRating(), e.getRatingCount(), localId});
+                        }
+                    }
+                    cursor.close();
                 }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
     }
 
     private Event parseEventFromJSON(JSONObject obj) {
         try {
-            String mongoId = obj.optString("_id", ""); // IZMENA: Čitamo MongoDB jedinstveni ID sa servera
+            String mongoId = obj.optString("_id", "");
             String name = obj.optString("name", "");
             String desc = obj.optString("description", "");
             String loc = obj.optString("location", "");
@@ -181,7 +228,7 @@ public class EventRepository {
             Event event = new Event(name, desc, loc, date, cat, img, promoted,
                     capacity, attending, avgRating, numRatings);
 
-            event.setMongoId(mongoId); // IZMENA: Dodajemo pročitan ID u objekat
+            event.setMongoId(mongoId);
             return event;
 
         } catch (Exception e) {
