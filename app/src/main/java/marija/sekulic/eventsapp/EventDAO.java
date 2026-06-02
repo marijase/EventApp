@@ -181,4 +181,15 @@ public class EventDAO {
 
         return rowsAffected > 0;
     }
+    public int getLocalIdByMongoId(String mongoId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT id FROM events WHERE mongo_id = ?", new String[]{mongoId});
+        int id = 0;
+        if (cursor.moveToFirst()) {
+            id = cursor.getInt(0);
+        }
+        cursor.close();
+        db.close();
+        return id;
+    }
 }

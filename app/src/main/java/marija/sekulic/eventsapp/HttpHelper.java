@@ -44,29 +44,42 @@ public class HttpHelper {
 
     public static JSONArray getJSONArrayFromURL(String urlString) throws IOException, JSONException {
         HttpURLConnection urlConnection = null;
-        URL url = new URL(urlString);
-        urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod("GET");
-        urlConnection.setRequestProperty("Accept", "application/json");
-        urlConnection.setReadTimeout(10000);
-        urlConnection.setConnectTimeout(15000);
         try {
+            URL url = new URL(urlString);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setRequestProperty("Accept", "application/json");
+            urlConnection.setReadTimeout(10000);
+            urlConnection.setConnectTimeout(15000);
+
             urlConnection.connect();
+
+            int responseCode = urlConnection.getResponseCode();
+            if (responseCode != SUCCESS) {
+                Log.e("HTTP GET", "Server vratio kod: " + responseCode);
+                return null;
+            }
+
+            // ČITANJE IZ PODEŠENE KONEKCIJE, A NE IZ URL-A DIREKTNO
+            BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            br.close();
+
+            String jsonString = sb.toString();
+            Log.d("HTTP GET", "JSON arr- " + jsonString);
+            return new JSONArray(jsonString);
         } catch (IOException e) {
+            Log.e("HTTP GET", "Greška u mrežnom pozivu: " + e.getMessage());
             return null;
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
-        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line + "\n");
-        }
-        br.close();
-        String jsonString = sb.toString();
-        Log.d("HTTP GET", "JSON arr- " + jsonString);
-        int responseCode = urlConnection.getResponseCode();
-        urlConnection.disconnect();
-        return responseCode == SUCCESS ? new JSONArray(jsonString) : null;
     }
 
     public static JSONObject postJSONObjectFromURL(String urlString, JSONObject jsonObject) {
