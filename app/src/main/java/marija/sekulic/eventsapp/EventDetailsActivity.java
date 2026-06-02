@@ -41,12 +41,13 @@ public class EventDetailsActivity extends AppCompatActivity {
         TextView txtRating = findViewById(R.id.txt_details_rating);
         Button btnInterested = findViewById(R.id.btn_interested);
         Button btnAttending = findViewById(R.id.btn_attending);
-        Button btnRate = findViewById(R.id.btn_confirm_rating); // Pretpostavljam da imaš dugme za ocenu ovde
+        Button btnRate = findViewById(R.id.btn_confirm_rating);
 
         imgEvent.setImageResource(trenutniEvent.getImageResId());
         txtName.setText(trenutniEvent.getName());
         txtDesc.setText(trenutniEvent.getDescription());
         txtLoc.setText(trenutniEvent.getLocation());
+
         if (trenutniEvent.getDateTime() != null) {
             txtDate.setText(sdf.format(trenutniEvent.getDateTime()));
         } else {
@@ -66,6 +67,10 @@ public class EventDetailsActivity extends AppCompatActivity {
             txtRating.setText(String.format("Prosečna ocena: %.1f (%d ocena)", trenutniEvent.getAverageRating(), trenutniEvent.getRatingCount()));
         }
 
+        // Provera da li smo u offline režimu
+        SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
+        boolean isOfflineMode = sp.getBoolean("is_offline_mode", false);
+
         // Blokada za prošle događaje
         if (trenutniEvent.isPast()) {
             btnInterested.setOnClickListener(v -> Toast.makeText(this, "Ovaj događaj je završen", Toast.LENGTH_SHORT).show());
@@ -73,6 +78,10 @@ public class EventDetailsActivity extends AppCompatActivity {
 
             if (btnRate != null) {
                 btnRate.setOnClickListener(v -> {
+                    if (isOfflineMode) {
+                        Toast.makeText(this, "Ocenjivanje nije moguće u offline režimu!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     Intent intent = new Intent(this, RatingActivity.class);
                     intent.putExtra("EVENT_ID", trenutniEvent.getId());
                     intent.putExtra("EVENT_NAME", trenutniEvent.getName());
@@ -80,14 +89,12 @@ public class EventDetailsActivity extends AppCompatActivity {
                 });
             }
         } else {
-            SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
             String serverUserId = sp.getString("current_server_id", "");
             String currentUsername = sp.getString("current_user", "");
 
             UserDAO userDAO = new UserDAO(this);
             int localUserId = userDAO.getUserIdByUsername(currentUsername);
 
-            // OSIGURANJE KORISNIKA: Ako korisnik ne postoji u SQLite (jer je logovan preko servera), kreiraj ga odmah!
             if (localUserId <= 0) {
                 SQLiteDatabase db = new DatabaseHelper(this).getWritableDatabase();
                 ContentValues uValues = new ContentValues();
@@ -104,39 +111,51 @@ public class EventDetailsActivity extends AppCompatActivity {
 
             AttendanceRepository attendanceRepo = new AttendanceRepository(this);
 
-            btnInterested.setOnClickListener(v ->
-                    attendanceRepo.markAttendance(
-                            serverUserId, serverEventId,
-                            finalLocalUserId, trenutniEvent.getId(),
-                            "ZAINTERESOVAN",
-                            new RepositoryCallback<String>() {
-                                @Override
-                                public void onResult(String result) {
-                                    Toast.makeText(EventDetailsActivity.this, result, Toast.LENGTH_SHORT).show();
-                                }
-                                @Override
-                                public void onError(String errorMessage) {
-                                    Toast.makeText(EventDetailsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
-                                }
-                            })
-            );
+            btnInterested.setOnClickListener(v -> {
+                // BLOKADA ZA OFFLINE MOD
+                if (isOfflineMode) {
+                    Toast.makeText(this, "Dodavanje u zainteresovane nije moguće u offline režimu!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-            btnAttending.setOnClickListener(v ->
-                    attendanceRepo.markAttendance(
-                            serverUserId, serverEventId,
-                            finalLocalUserId, trenutniEvent.getId(),
-                            "PRISUSTVUJE",
-                            new RepositoryCallback<String>() {
-                                @Override
-                                public void onResult(String result) {
-                                    Toast.makeText(EventDetailsActivity.this, result, Toast.LENGTH_SHORT).show();
-                                }
-                                @Override
-                                public void onError(String errorMessage) {
-                                    Toast.makeText(EventDetailsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
-                                }
-                            })
-            );
+                attendanceRepo.markAttendance(
+                        serverUserId, serverEventId,
+                        finalLocalUserId, trenutniEvent.getId(),
+                        "ZAINTERESOVAN",
+                        new RepositoryCallback<String>() {
+                            @Override
+                            public void onResult(String result) {
+                                Toast.makeText(EventDetailsActivity.this, result, Toast.LENGTH_SHORT).show();
+                            }
+                            @Override
+                            public void onError(String errorMessage) {
+                                Toast.makeText(EventDetailsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            });
+
+            btnAttending.setOnClickListener(v -> {
+                // BLOKADA ZA OFFLINE MOD
+                if (isOfflineMode) {
+                    Toast.makeText(this, "Prijava na događaj nije moguća u offline režimu!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                attendanceRepo.markAttendance(
+                        serverUserId, serverEventId,
+                        finalLocalUserId, trenutniEvent.getId(),
+                        "PRISUSTVUJE",
+                        new RepositoryCallback<String>() {
+                            @Override
+                            public void onResult(String result) {
+                                Toast.makeText(EventDetailsActivity.this, result, Toast.LENGTH_SHORT).show();
+                            }
+                            @Override
+                            public void onError(String errorMessage) {
+                                Toast.makeText(EventDetailsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            });
         }
     }
 }
