@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -15,19 +16,19 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class EventDetailsActivity extends AppCompatActivity {
-    private final SimpleDateFormat sdf =
-            new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
+
+    private static final String TAG = "EventDetailsActivity";
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_details);
 
-        int eventId = getIntent().getIntExtra("EVENT_ID", -1);
-        EventDAO eventDAO = new EventDAO(this);
-        Event trenutniEvent = eventDAO.getEventById(eventId);
+        final Event event = findEvent();
 
-        if (trenutniEvent == null) {
+        if (event == null) {
+            Toast.makeText(this, "Event nije pronađen", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -43,38 +44,61 @@ public class EventDetailsActivity extends AppCompatActivity {
         Button btnAttending = findViewById(R.id.btn_attending);
         Button btnRate = findViewById(R.id.btn_confirm_rating);
 
-        imgEvent.setImageResource(trenutniEvent.getImageResId());
-        txtName.setText(trenutniEvent.getName());
-        txtDesc.setText(trenutniEvent.getDescription());
-        txtLoc.setText(trenutniEvent.getLocation());
+        imgEvent.setImageResource(event.getImageResId());
+        txtName.setText(event.getName());
+        txtDesc.setText(event.getDescription());
+        txtLoc.setText(event.getLocation());
 
-        if (trenutniEvent.getDateTime() != null) {
-            txtDate.setText(sdf.format(trenutniEvent.getDateTime()));
+        if (event.getDateTime() != null) {
+            txtDate.setText(sdf.format(event.getDateTime()));
         } else {
             txtDate.setText("Datum nije dostupan");
         }
 
-        if (trenutniEvent.isPromoted()) {
+        if (event.isPromoted()) {
             txtCapacity.setVisibility(View.VISIBLE);
-            txtCapacity.setText("Slobodnih mesta: " + (trenutniEvent.getCapacity() - trenutniEvent.getAttendingCount()) + "/" + trenutniEvent.getCapacity());
+            txtCapacity.setText("Slobodnih mesta: "
+                    + (event.getCapacity() - event.getAttendingCount())
+                    + "/" + event.getCapacity());
         } else {
             txtCapacity.setVisibility(View.GONE);
         }
 
-        if (trenutniEvent.getRatingCount() == 0) {
+        if (event.getRatingCount() == 0) {
             txtRating.setText("Još uvek nema ocena");
         } else {
-            txtRating.setText(String.format("Prosečna ocena: %.1f (%d ocena)", trenutniEvent.getAverageRating(), trenutniEvent.getRatingCount()));
+            txtRating.setText(String.format("Prosečna ocena: %.1f (%d ocena)",
+                    event.getAverageRating(), event.getRatingCount()));
         }
 
-        // Provera da li smo u offline režimu
+        // Provjeri exclusive prozor za SVE evente (ne samo one iz notifikacije)
+        if (event.getMongoId() != null) {
+            SharedPreferences exclusiveSp = getSharedPreferences("ExclusiveEvents", MODE_PRIVATE);
+            long expireTime = exclusiveSp.getLong("exclusive_" + event.getMongoId() + "_expireTime", 0);
+
+            if (expireTime > 0) {
+                // Ovo je exclusive event
+                if (System.currentTimeMillis() > expireTime) {
+                    // Prozor je zatvoren
+                    btnAttending.setEnabled(false);
+                    btnAttending.setText("Prozor zatvoren");
+                    Log.d(TAG, "Exclusive event - prozor zatvoren");
+                } else {
+                    // Prozor je otvoren
+                    Log.d(TAG, "Exclusive event - prozor otvoren, ostalo: "
+                            + (expireTime - System.currentTimeMillis()) / 1000 + "s");
+                }
+            }
+        }
+
         SharedPreferences sp = getSharedPreferences("UserData", MODE_PRIVATE);
         boolean isOfflineMode = sp.getBoolean("is_offline_mode", false);
 
-        // Blokada za prošle događaje
-        if (trenutniEvent.isPast()) {
-            btnInterested.setOnClickListener(v -> Toast.makeText(this, "Ovaj događaj je završen", Toast.LENGTH_SHORT).show());
-            btnAttending.setOnClickListener(v -> Toast.makeText(this, "Ovaj događaj je završen", Toast.LENGTH_SHORT).show());
+        if (event.isPast()) {
+            btnInterested.setOnClickListener(v ->
+                    Toast.makeText(this, "Ovaj događaj je završen", Toast.LENGTH_SHORT).show());
+            btnAttending.setOnClickListener(v ->
+                    Toast.makeText(this, "Ovaj događaj je završen", Toast.LENGTH_SHORT).show());
 
             if (btnRate != null) {
                 btnRate.setOnClickListener(v -> {
@@ -83,8 +107,8 @@ public class EventDetailsActivity extends AppCompatActivity {
                         return;
                     }
                     Intent intent = new Intent(this, RatingActivity.class);
-                    intent.putExtra("EVENT_ID", trenutniEvent.getId());
-                    intent.putExtra("EVENT_NAME", trenutniEvent.getName());
+                    intent.putExtra("EVENT_ID", event.getId());
+                    intent.putExtra("EVENT_NAME", event.getName());
                     startActivity(intent);
                 });
             }
@@ -107,55 +131,74 @@ public class EventDetailsActivity extends AppCompatActivity {
             }
 
             final int finalLocalUserId = localUserId;
-            String serverEventId = trenutniEvent.getMongoId();
-
+            final String serverEventId = event.getMongoId();
             AttendanceRepository attendanceRepo = new AttendanceRepository(this);
 
             btnInterested.setOnClickListener(v -> {
-                // BLOKADA ZA OFFLINE MOD
                 if (isOfflineMode) {
-                    Toast.makeText(this, "Dodavanje u zainteresovane nije moguće u offline režimu!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Nije moguće u offline režimu!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-                attendanceRepo.markAttendance(
-                        serverUserId, serverEventId,
-                        finalLocalUserId, trenutniEvent.getId(),
-                        "ZAINTERESOVAN",
+                attendanceRepo.markAttendance(serverUserId, serverEventId,
+                        finalLocalUserId, event.getId(), "ZAINTERESOVAN",
                         new RepositoryCallback<String>() {
-                            @Override
-                            public void onResult(String result) {
+                            @Override public void onResult(String result) {
                                 Toast.makeText(EventDetailsActivity.this, result, Toast.LENGTH_SHORT).show();
                             }
-                            @Override
-                            public void onError(String errorMessage) {
+                            @Override public void onError(String errorMessage) {
                                 Toast.makeText(EventDetailsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                             }
                         });
             });
 
             btnAttending.setOnClickListener(v -> {
-                // BLOKADA ZA OFFLINE MOD
                 if (isOfflineMode) {
-                    Toast.makeText(this, "Prijava na događaj nije moguća u offline režimu!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Nije moguće u offline režimu!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                attendanceRepo.markAttendance(
-                        serverUserId, serverEventId,
-                        finalLocalUserId, trenutniEvent.getId(),
-                        "PRISUSTVUJE",
+                // Proveri exclusive prozor SVAKI PUT kad se klikne dugme
+                if (event.getMongoId() != null) {
+                    SharedPreferences exclusiveSp = getSharedPreferences("ExclusiveEvents", MODE_PRIVATE);
+                    long expireTime = exclusiveSp.getLong("exclusive_" + event.getMongoId() + "_expireTime", 0);
+                    if (expireTime > 0 && System.currentTimeMillis() > expireTime) {
+                        Toast.makeText(this, "Prozor za prijavu je zatvoren!", Toast.LENGTH_SHORT).show();
+                        btnAttending.setEnabled(false);
+                        btnAttending.setText("Prozor zatvoren");
+                        return;
+                    }
+                }
+
+                attendanceRepo.markAttendance(serverUserId, serverEventId,
+                        finalLocalUserId, event.getId(), "PRISUSTVUJE",
                         new RepositoryCallback<String>() {
-                            @Override
-                            public void onResult(String result) {
+                            @Override public void onResult(String result) {
                                 Toast.makeText(EventDetailsActivity.this, result, Toast.LENGTH_SHORT).show();
                             }
-                            @Override
-                            public void onError(String errorMessage) {
+                            @Override public void onError(String errorMessage) {
                                 Toast.makeText(EventDetailsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                             }
                         });
             });
         }
+    }
+
+    private Event findEvent() {
+        EventDAO eventDAO = new EventDAO(this);
+
+        String exclusiveMongoId = getIntent().getStringExtra("EXCLUSIVE_EVENT_ID");
+        if (exclusiveMongoId != null) {
+            Log.d(TAG, "Otvaram exclusive event mongoId=" + exclusiveMongoId);
+            Event e = eventDAO.getEventByMongoId(exclusiveMongoId);
+            if (e == null) {
+                Log.e(TAG, "Exclusive event nije pronađen u bazi!");
+            }
+            return e;
+        }
+
+        int eventId = getIntent().getIntExtra("EVENT_ID", -1);
+        Log.d(TAG, "Otvaram event id=" + eventId);
+        if (eventId == -1) return null;
+        return eventDAO.getEventById(eventId);
     }
 }

@@ -192,4 +192,70 @@ public class EventDAO {
         db.close();
         return id;
     }
+    public boolean createEventByMongoId(Event event) {
+        if (event.getMongoId() == null || event.getMongoId().isEmpty()) {
+            return createEvent(event);
+        }
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor check = db.rawQuery("SELECT id FROM events WHERE mongo_id = ?",
+                new String[]{event.getMongoId()});
+        if (check.getCount() > 0) {
+            check.close();
+            db.close();
+            return false;
+        }
+        check.close();
+
+        ContentValues values = new ContentValues();
+        values.put("mongo_id", event.getMongoId());
+        values.put("naziv", event.getName());
+        values.put("opis", event.getDescription());
+        values.put("lokacija", event.getLocation());
+        values.put("kategorija", event.getCategory());
+        values.put("promoted", event.isPromoted() ? 1 : 0);
+        values.put("kapacitet", event.getCapacity());
+        values.put("datumVreme", event.getDateTime() != null ? sdf.format(event.getDateTime()) : "");
+
+        long result = db.insert("events", null, values);
+        db.close();
+        return result != -1;
+    }
+    public Event getEventByMongoId(String mongoId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM events WHERE mongo_id = ?", new String[]{mongoId});
+
+        if (cursor.moveToFirst()) {
+            String name = cursor.getString(cursor.getColumnIndexOrThrow("naziv"));
+            String desc = cursor.getString(cursor.getColumnIndexOrThrow("opis"));
+            String loc = cursor.getString(cursor.getColumnIndexOrThrow("lokacija"));
+            String cat = cursor.getString(cursor.getColumnIndexOrThrow("kategorija"));
+            boolean isPromoted = cursor.getInt(cursor.getColumnIndexOrThrow("promoted")) == 1;
+            int capacity = cursor.getInt(cursor.getColumnIndexOrThrow("kapacitet"));
+            int attendingCount = cursor.getInt(cursor.getColumnIndexOrThrow("brojPrisutnih"));
+            double averageRating = cursor.getDouble(cursor.getColumnIndexOrThrow("prosecnaOcena"));
+            int ratingCount = cursor.getInt(cursor.getColumnIndexOrThrow("brojOcena"));
+            int localId = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
+
+            Date date;
+            try {
+                date = sdf.parse(cursor.getString(cursor.getColumnIndexOrThrow("datumVreme")));
+            } catch (Exception e) {
+                date = null;
+            }
+
+            cursor.close();
+            db.close();
+
+            Event event = new Event(name, desc, loc, date, cat,
+                    EventFactory.getImageForCategory(cat), isPromoted, capacity,
+                    attendingCount, averageRating, ratingCount);
+            event.setId(localId);
+            event.setMongoId(mongoId);
+            return event;
+        }
+
+        cursor.close();
+        db.close();
+        return null;
+    }
 }
